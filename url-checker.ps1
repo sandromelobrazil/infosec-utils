@@ -122,7 +122,7 @@ function getServicesDetected($servicesList) {
     if ($servicesList -ne $null) {
         $services = Get-Member -InputObject $servicesList -MemberType NoteProperty
         
-        foreach($service in $services) {
+        foreach ($service in $services) {
             $serviceValue = $servicesList | Select-Object -ExpandProperty $service.Name
             $serviceToAdd = @{
                 serviceName = $service.Name
