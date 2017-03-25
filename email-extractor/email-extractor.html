@@ -1,0 +1,78 @@
+
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="tools.css">
+        <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/mantvydasb/nodspot-web/master/css/normalize.css">
+        <meta http-equiv="content-type" content="text/php; charset=utf-8" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <title>Email Extractor</title>
+    </head>
+
+    <body>
+		<h1>US Bank Emails' Extractor</h1>
+		
+		<div class="col2">
+			<h2>Paste Logs Here</h2>
+				<textarea id="logsText" onclick="parseEmails()" onblur="parseEmails()" onchange="parseEmails()">Paste logs here</textarea>	
+		</div>
+
+		<div class="col2">
+			<h2>Extracted emails</h2>
+			<textarea id="extractedEmails">Extracted emails will appear here.</textarea>
+		</div>
+		
+	</body>
+	
+</html>
+
+
+
+<script>
+parseEmails = function() {	
+	var extractedEmailsTextArea = $('#extractedEmails'),
+	 	extractedEmails = extractEmailsFromText(),
+	 	deduplicatedEmails = deduplicateEmails(extractedEmails);
+	
+	extractedEmailsTextArea.text(deduplicatedEmails);
+	importantEmails = involvesTOP5(deduplicatedEmails);
+	importantEmails.length > 0 ? extractedEmailsTextArea.text(extractedEmailsTextArea.text() + "\n\n\n==============================================\nTOP 5: " + importantEmails.toString()) : false;	
+}
+
+involvesTOP5 = function(extractedEmails) {
+	var TOP5_EMAILS = [""],
+		importantEmails = [];
+	
+	$.each(TOP5_EMAILS, function(index, email) {
+		if (extractedEmails.indexOf(email) > - 1) {
+			importantEmails.push(email);
+		}
+	});
+	
+	return importantEmails;
+}
+
+extractEmailsFromText = function() {
+	var logsText = $('#logsText').val(),
+		emailRegex = /([a-z.]+)\w+@(usbank.com)/gi,
+		extractedEmails = logsText.match(emailRegex);
+	
+	return extractedEmails;
+}
+
+function deduplicateEmails(extractedEmails) {
+	var deduplicatedEmails = [];
+	
+	$.each(extractedEmails, function(index1, email1) {
+		if (email1 != null) {
+			$.each(extractedEmails, function(index2, email2) {
+				if (extractedEmails.indexOf(email2) > -1 && email1 == email2 && index1 != index2) {
+					extractedEmails[index2] = null;
+				}
+			});
+			email1 != null ? deduplicatedEmails.push(email1) : false;
+		}
+	});
+	
+	return deduplicatedEmails;
+}
+</script>
