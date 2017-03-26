@@ -70,7 +70,7 @@ def getRegistrantInfo(whoisRawData):
     for index, attribute in enumerate(registrantAttributes):
         registrantInfoValues.append(getRegistrantDataByAttribute(whoisRawData, attribute))
 
-    replaceEmptyItemsWithPlaceholders(registrantInfoValues)
+    registrantInfoValues = replaceEmptyItemsWithPlaceholders(registrantInfoValues)
     registrantInfo = dict(zip(registrantInfoKeys, registrantInfoValues))
 
     return registrantInfo
