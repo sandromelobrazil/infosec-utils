@@ -1,14 +1,14 @@
 #!/bin/python3.5
-
 import urllib.request
 import json
 import sys
 
-def sendGETRequest(url):
+def sendGetRequest(url):
     response = urllib.request.urlopen(url).read().decode("utf-8")
     return response
 
-def fetchAllDNSRecords(hostname):
+
+def fetchAllDNSRecords(domain):
     recordsToLookUp = [
         "A",
         "MX",
@@ -18,22 +18,42 @@ def fetchAllDNSRecords(hostname):
     ]
 
     for record in recordsToLookUp:
-        dnsRecords = getDNSRecordsForHost(hostname, record)
-        printDNSrecords(dnsRecords)
+        dnsRecords = lookupDNSRecordForHost(domain, record)
+        printDNSRecords(dnsRecords)
 
-def getDNSRecordsForHost(hostname, recordType):
+
+def lookupDNSRecordForHost(hostname, recordType):
     baseUrl = "https://dns-api.org/"
     recordType += "/"
     url = baseUrl + recordType + hostname
-    dnsRecordsRaw = sendGETRequest(url)
+    dnsRecordsRaw = sendGetRequest(url)
 
     return dnsRecordsRaw
 
-def printDNSrecords(dnsRecordsRaw):
+
+def printDNSRecords(dnsRecordsRaw):
     dnsRecords = json.loads(dnsRecordsRaw)
     for dnsRecord in dnsRecords:
-        print(dnsRecord["type"] + "\t" + dnsRecord["value"] + "\t" + dnsRecord["name"])
+        try:
+            print(dnsRecord["type"] + "\t" + dnsRecord["value"] + "\t" + dnsRecord["name"])
+        except:
+            print("Some DNS records may be missing..")
 
-if (sys.argv[1]):
-    hostname = sys.argv[1]
-    fetchAllDNSRecords(hostname)
+
+def whoisDomain(domain):
+    url = "http://whoiz.herokuapp.com/lookup.json?url=" + domain
+    whoisResponseRaw = sendGetRequest(url)
+    return whoisResponseRaw
+
+def printWhois(whoisRaw):
+    whois = json.loads(whoisRaw)
+    print("Created: " + str(whois["created_on"]))
+
+if sys.argv.__len__() > 1:
+    domain = sys.argv[1]
+    fetchAllDNSRecords(domain)
+    whoisDomainRaw = whoisDomain(domain)
+    printWhois(whoisDomainRaw)
+
+else:
+    print("Supply a hostname like so whois.py [hostname]")
