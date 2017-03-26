@@ -86,7 +86,8 @@ def replaceEmptyItemsWithPlaceholders(registrantInfoValues):
 
 def getRegistrantDataByAttribute(whoisRawData, attribute):
     if whoisRawData.find(attribute) > 0 :
-        return whoisRawData.split(attribute)[1].split("\n")[0]
+        value = whoisRawData.split(attribute)[1].split("\n")[0]
+        return str(value).strip()
 
 
 def main():
