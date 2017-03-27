@@ -26,8 +26,8 @@
       <file leaf-file-name="whois.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/whois.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.29932886">
-              <caret line="105" column="0" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.89395976">
+              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -66,9 +66,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="43" />
+    <option name="x" value="1301" />
     <option name="y" value="27" />
-    <option name="width" value="2517" />
+    <option name="width" value="1258" />
     <option name="height" value="1413" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -138,7 +138,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Infosec Utils" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/whois.py" />
-      <option name="PARAMETERS" value="usbank.com" />
+      <option name="PARAMETERS" value="nodspot.co" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
@@ -299,14 +299,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="43" y="27" width="2517" height="1413" extended-state="6" />
+    <frame x="1301" y="27" width="1258" height="1413" extended-state="4" />
     <editor active="true" />
     <layout>
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24639423" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20210186" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39968896" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32970452" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5520995" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -329,7 +329,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/whois.py</url>
-          <line>114</line>
+          <line>121</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
@@ -340,7 +340,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="25" />
+      <option name="time" value="26" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -411,8 +411,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/whois.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.29932886">
-          <caret line="105" column="0" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.89395976">
+          <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
           <folding />
         </state>
       </provider>
