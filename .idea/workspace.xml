@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3be05f4b-dc88-418f-8f0d-7a9c1967bfcc" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/whois.py" afterPath="$PROJECT_DIR$/whois.py" />
     </list>
     <ignored path="Infosec Utils.iws" />
@@ -27,8 +26,8 @@
       <file leaf-file-name="whois.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/whois.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7100671">
-              <caret line="141" column="41" selection-start-line="141" selection-start-column="41" selection-end-line="141" selection-end-column="41" />
+            <state vertical-scroll-proportion="0.25100672">
+              <caret line="113" column="18" selection-start-line="113" selection-start-column="18" selection-end-line="113" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -412,8 +411,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/whois.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7100671">
-          <caret line="141" column="41" selection-start-line="141" selection-start-column="41" selection-end-line="141" selection-end-column="41" />
+        <state vertical-scroll-proportion="0.25100672">
+          <caret line="113" column="18" selection-start-line="113" selection-start-column="18" selection-end-line="113" selection-end-column="18" />
           <folding />
         </state>
       </provider>

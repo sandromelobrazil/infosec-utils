@@ -111,8 +111,8 @@ def scanIP(ip):
 def getThreatReportsByIP(ip):
     url = BASE_CYMON_URL + ip + "/events"
     response = sendGetRequest(url)
-    threatsReportsRaw = convertStringToJSON(response)
-    return threatsReportsRaw
+    threatsReports = convertStringToJSON(response)
+    return threatsReports
 
 
 def printThreatReports(threatReports):
