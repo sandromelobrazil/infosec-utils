@@ -1,0 +1,49 @@
+
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="tools.css">
+        <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/mantvydasb/nodspot-web/master/css/normalize.css">
+        <meta http-equiv="content-type" content="text/php; charset=utf-8" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <title>Email Extractor</title>
+    </head>
+
+    <body>
+		<h1>Source Code Viewer</h1>
+		
+		<div>
+			<!--<h2>Paste Logs Here</h2>-->
+				<input id="url" onclick="getSourceCodeByUrl(this)" text/>
+				<textarea id="sourceCodeTextArea" onclick="parseEmails()">Source code will be shown here..</textarea>	
+		</div>		
+	</body>
+	
+</html>
+
+
+
+<script>
+
+getSourceCodeByUrl = function(url) {
+	var url = $(url).val()
+	var response = $.get(url, function(data) {
+		var sourceCodeTextArea = $('#sourceCodeTextArea');
+		sourceCodeTextArea.val(response);
+	});
+
+// $.get( "ajax/test.html", function( data ) {
+//   $( ".result" ).html( data );
+//   alert( "Load was performed." );
+// });
+
+}
+
+extractEmailsFromText = function() {
+	var logsText = $('#logsText').val(),
+		emailRegex = /([a-z.]+)\w+@(usbank.com)/gi,
+		extractedEmails = logsText.match(emailRegex);
+	
+	return extractedEmails;
+}
+
+</script>
