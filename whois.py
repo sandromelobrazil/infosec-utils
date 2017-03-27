@@ -3,6 +3,8 @@ import urllib.request
 import json
 import sys
 
+# todo: accept ip as an argument
+
 BASE_WHOIS_URL = "https://www.whois.com/whois/"
 BASE_CYMON_URL = "https://cymon.io/api/nexus/v1/ip/"
 
@@ -100,12 +102,6 @@ def getRegistrantDataByAttribute(whoisRawData, attribute):
     if whoisRawData.find(attribute) > 0 :
         value = whoisRawData.split(attribute)[1].split("\n")[0]
         return str(value).strip()
-
-
-def scanIP(ip):
-    "https://mxtoolbox.com/SuperTool.aspx?action=scan%3a134.213.168.37&run=networktools"
-    response = sendGetRequest("https://mxtoolbox.com/SuperTool.aspx?action=scan%3a134.213.168.37&run=networktools")
-    return response
 
 
 def getThreatReportsByIP(ip):
