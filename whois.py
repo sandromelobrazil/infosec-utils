@@ -123,7 +123,7 @@ def printThreatReports(threatReports):
         print("\n\n[*] Some historical threat reports for " + DOMAIN_IP)
 
         for report in threatReports["results"]:
-            print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).strip().replace(".","[.]"))
+            print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).replace(".","[.]").strip())
             containsDetailsUrl = (report["details_url"] != None)
 
             if containsDetailsUrl:
