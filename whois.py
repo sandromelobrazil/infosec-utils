@@ -42,6 +42,16 @@ def getIPFromDNSRecord(dnsRecords, record):
         print("Domain you entered could not be resolved, check spelling.")
         exit(1)
 
+def getDomainsByIP(ip):
+    url = BASE_CYMON_URL + ip + "/domains/"
+    domainsRaw = sendGetRequest(url)
+    return domainsRaw
+
+def printDomains(domains):
+    domains = convertStringToJSON(domains)
+    print("[*] Some associated domains:")
+    for domain in domains["results"]:
+        print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
 
 def getDNSRecordsByDomain(domain, recordType):
     baseUrl = "https://dns-api.org/"
@@ -72,8 +82,9 @@ def getWhoisRawByDomain(domain):
     return whoisResponseRaw
 
 
+
 def printRegistrantInfo(registrantInfo, domain):
-    print("Created:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
+    print("Registered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
         "Location:\t" + registrantInfo["country"] + ", " + registrantInfo["state"] + ", " + registrantInfo["city"] + "\n"
         "More:\t\t" + BASE_WHOIS_URL + domain)
 
@@ -120,7 +131,7 @@ def getThreatReportsByIP(ip):
 
 def printThreatReports(threatReports):
     if threatReports["count"] > 0:
-        print("\n\n[*] Some historical threat reports for " + DOMAIN_IP)
+        print("\n\n[*] Some historical threat reports for: " + DOMAIN_IP)
 
         for report in threatReports["results"]:
             print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).replace(".","[.]").strip())
@@ -154,6 +165,9 @@ def main():
             printRegistrantInfo(registrantInfo, domain)
         else:
             DOMAIN_IP = domain
+            domainsRaw = getDomainsByIP(DOMAIN_IP)
+            printDomains(domainsRaw)
+
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
 
