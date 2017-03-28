@@ -1,4 +1,5 @@
 #!/bin/python3.5
+# HKEY_CLASSES_ROOT\Python.File\Shell\open\command
 import urllib.request
 import json
 import sys
@@ -42,16 +43,20 @@ def getIPFromDNSRecord(dnsRecords, record):
         print("Domain you entered could not be resolved, check spelling.")
         exit(1)
 
+
 def getDomainsByIP(ip):
     url = BASE_CYMON_URL + ip + "/domains/"
     domainsRaw = sendGetRequest(url)
     return domainsRaw
 
+
 def printDomains(domains):
     domains = convertStringToJSON(domains)
-    print("[*] Some associated domains:")
+    print("\n\n[*] Some associated domains:")
+    
     for domain in domains["results"]:
         print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
+
 
 def getDNSRecordsByDomain(domain, recordType):
     baseUrl = "https://dns-api.org/"
@@ -138,7 +143,8 @@ def printThreatReports(threatReports):
             containsDetailsUrl = (report["details_url"] != None)
 
             if containsDetailsUrl:
-                    print("More: " + report["details_url"] + "\n")
+                    print("More: " + report["details_url"])
+            print("\r")
     else:
         print("\n\n[*] No threat reports found for " + DOMAIN_IP)
 
