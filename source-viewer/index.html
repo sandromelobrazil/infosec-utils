@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="tools.css">
+        <link rel="stylesheet" type="text/css" href="https://raw.githubusercontent.com/mantvydasb/nodspot-web/master/css/normalize.css">
+        <meta http-equiv="content-type" content="text/php; charset=utf-8" />
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <title>Source Code Viewer</title>
+    </head>
+
+    <body>
+		<h1>Source Code Viewer</h1>
+		
+		<div class="col col3">
+				<input id="url" placeholder="enter URL and hit enter" onkeyup="getSourceCodeByUrl(event)" text/>
+				<textarea id="sourceCodeTextArea" onclick="">Source code will be shown here..</textarea>	
+		</div>		
+		<div class="col col2">
+			<h2>Extracted URLs</h2>
+
+				<textarea id="extractedUrls" onclick="">Extracted URLs will be shown here..</textarea>	
+		</div>		
+
+	</body>
+	
+</html>
+
+
+
+<script>
+var sourceCodeTextArea = $('#sourceCodeTextArea');
+
+getSourceCodeByUrl = function(event) {
+	if (event.keyCode == 13) {
+		var url = "index.php?url=" + $(event.target).val();
+		var response = $.get(url, function(data) {
+			sourceCodeTextArea.val(data);
+		});
+	}
+}
+
+
+extractUrls = function() {
+	var souceCodeText = sourceCodeTextArea.val(),
+		regex = /([a-z.]+)\w+@(usbank.com)/gi,
+		results = souceCodeText.match(regex);
+	
+	return extractedUrls;
+}
+
+</script>
