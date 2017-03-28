@@ -1,4 +1,5 @@
 #!/bin/python3.5
+# HKEY_CLASSES_ROOT\Python.File\Shell\open\command
 import urllib.request
 import json
 import sys
@@ -43,6 +44,20 @@ def getIPFromDNSRecord(dnsRecords, record):
         exit(1)
 
 
+def getDomainsByIP(ip):
+    url = BASE_CYMON_URL + ip + "/domains/"
+    domainsRaw = sendGetRequest(url)
+    return domainsRaw
+
+
+def printDomains(domains):
+    domains = convertStringToJSON(domains)
+    print("\n\n[*] Some associated domains:")
+    
+    for domain in domains["results"]:
+        print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
+
+
 def getDNSRecordsByDomain(domain, recordType):
     baseUrl = "https://dns-api.org/"
     recordType += "/"
@@ -72,8 +87,9 @@ def getWhoisRawByDomain(domain):
     return whoisResponseRaw
 
 
+
 def printRegistrantInfo(registrantInfo, domain):
-    print("Created:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
+    print("Registered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
         "Location:\t" + registrantInfo["country"] + ", " + registrantInfo["state"] + ", " + registrantInfo["city"] + "\n"
         "More:\t\t" + BASE_WHOIS_URL + domain)
 
@@ -120,14 +136,15 @@ def getThreatReportsByIP(ip):
 
 def printThreatReports(threatReports):
     if threatReports["count"] > 0:
-        print("\n\n[*] Some historical threat reports for " + DOMAIN_IP)
+        print("\n\n[*] Some historical threat reports for: " + DOMAIN_IP)
 
         for report in threatReports["results"]:
             print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).replace(".","[.]").strip())
             containsDetailsUrl = (report["details_url"] != None)
 
             if containsDetailsUrl:
-                    print("More: " + report["details_url"] + "\n")
+                    print("More: " + report["details_url"])
+            print("\r")
     else:
         print("\n\n[*] No threat reports found for " + DOMAIN_IP)
 
@@ -154,6 +171,9 @@ def main():
             printRegistrantInfo(registrantInfo, domain)
         else:
             DOMAIN_IP = domain
+            domainsRaw = getDomainsByIP(DOMAIN_IP)
+            printDomains(domainsRaw)
+
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
 
