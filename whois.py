@@ -89,7 +89,7 @@ def getWhoisRawByDomain(domain):
 
 
 def printRegistrantInfo(registrantInfo, domain):
-    print("Registered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
+    print("\nRegistered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
         "Location:\t" + registrantInfo["country"] + ", " + registrantInfo["state"] + ", " + registrantInfo["city"] + "\n"
         "More:\t\t" + BASE_WHOIS_URL + domain)
 
