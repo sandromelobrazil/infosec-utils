@@ -19,7 +19,7 @@ body {
 }
 
 input {
-	margin-bottom: 20px;
+	margin-bottom: 29px;
 	padding: 10px;
 	border: 1px solid;
 	font-family: monospace;
@@ -38,9 +38,8 @@ textarea {
 	padding: 30px;
 }
 
-#sourceCodeTextArea {
+#sourceCodeTextArea, #extractedUrlsTextArea {
 	height: 90%;
-
 }
 
 h1, h2, h3 {

@@ -14,13 +14,14 @@ function getContentByUrl($url) {
 	$response = curl_exec($curlHandle);
 	curl_close($curlHandle);
 
-	echo trim(htmlentities($response));
+	echo trim($response);
 }
 
 
 function handleHeaderCallback($curl, $header) {
 	$url = $_GET["url"];    
-	$locationUrl = explode("Location: ", $header);	
+	$header = strtolower($header);
+	$locationUrl = explode("location: ", $header);	
 
 	echo $header;
 
@@ -31,7 +32,7 @@ function handleHeaderCallback($curl, $header) {
 			$redirectUrl = $url . $redirectUrl;
 		}
 
-		echo "[*] Looks like we're beeing redirected to " . $redirectUrl . "\r";
+		echo "[*] Looks like we're being redirected to " . $redirectUrl . "\r";
 		getContentByUrl(trim($redirectUrl));
 	}
  	

@@ -15,9 +15,9 @@
 				<textarea id="sourceCodeTextArea" onclick="">Source code will be shown here..</textarea>	
 		</div>		
 		<div class="col col2">
-			<h2>Extracted URLs</h2>
+			<h2>External URLs</h2>
 
-				<textarea id="extractedUrls" onclick="">Extracted URLs will be shown here..</textarea>	
+				<textarea id="extractedUrlsTextArea" onclick="">Extracted URLs will be shown here..</textarea>	
 		</div>		
 
 	</body>
@@ -25,26 +25,55 @@
 </html>
 
 
-
 <script>
-var sourceCodeTextArea = $('#sourceCodeTextArea');
+var sourceCodeTextArea = $('#sourceCodeTextArea'),
+	extractUrlsTextArea = $('#extractedUrlsTextArea'),
+	urlInput = $('#url');
+	urlInput.focus();
 
 getSourceCodeByUrl = function(event) {
 	if (event.keyCode == 13) {
-		var url = "index.php?url=" + $(event.target).val();
-		var response = $.get(url, function(data) {
+		var url = "index.php?url=" + $(event.target).val(),
+			response = $.get(url, function(data) {
 			sourceCodeTextArea.val(data);
+			souceCodeText = sourceCodeTextArea.val();
+			extractedUrls = extractUrls(souceCodeText);
+			extractdedDomain = extractDomain(urlInput.val());
+			sanitisedUrls = sanitiseExtractedUrls(extractdedDomain, extractedUrls);
+			extractUrlsTextArea.val(sanitisedUrls);
 		});
 	}
 }
 
+sanitiseExtractedUrls = function(domain, extractedUrls) {
+	sanitisedUrls = [];
+	extractedUrls = extractedUrls.split("\n");
 
-extractUrls = function() {
-	var souceCodeText = sourceCodeTextArea.val(),
-		regex = /([a-z.]+)\w+@(usbank.com)/gi,
-		results = souceCodeText.match(regex);
+	$.each(extractedUrls, function(index, url) {
+		if (url.indexOf(domain) < 0) {
+			sanitisedUrls.push(url);
+		}
+	});
+
+	return convertArrayToStringWithNewLines(sanitisedUrls);	
+}
+
+convertArrayToStringWithNewLines = function(urls) {
+	return urls.toString().replace(/\,/g,"\n");
+}
+
+extractDomain = function(string) {
+	regex = /^(?:https?:)?(?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/gi,
+	domain = string.match(regex)[0].replace(/(https?:\/\/)?(www.)?/,"");
 	
-	return extractedUrls;
+	return domain;
+}
+
+extractUrls = function(string) {
+	var regex = /(https?:\/\/)([.[a-zA-Z/?#=0-9_:&;-]+)/gi,
+		extractedUrls = souceCodeText.match(regex);
+	
+	return convertArrayToStringWithNewLines(extractedUrls);
 }
 
 </script>
