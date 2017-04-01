@@ -67,7 +67,7 @@ extractDomain = function(string) {
 	regex = /^(?:https?:)?(?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n]+)/gi,
 	domain = string.match(regex)[0].replace(/(https?:\/\/)?(www.)?/,"");
 	
-	return domain;
+	return domain.toLowerCase();
 }
 
 extractUrls = function(string) {
