@@ -3,8 +3,8 @@
 $url = $_GET["url"];
 getContentByUrl($url);
 
-
 function getContentByUrl($url) {
+	echo "[*] Attempting " . $url . " ...\n";
 	$curlHandle = curl_init();
 	curl_setopt($curlHandle, CURLOPT_URL, $url);
 	curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, false);
@@ -14,7 +14,7 @@ function getContentByUrl($url) {
 	$response = curl_exec($curlHandle);
 	curl_close($curlHandle);
 
-	echo htmlentities($response);
+	echo trim(htmlentities($response));
 }
 
 
@@ -22,7 +22,7 @@ function handleHeaderCallback($curl, $header) {
 	$url = $_GET["url"];    
 	$locationUrl = explode("Location: ", $header);	
 
-	print "$header";	
+	echo $header;
 
 	if (isset($locationUrl[1])) {
 		$redirectUrl = $locationUrl[1];
@@ -31,7 +31,8 @@ function handleHeaderCallback($curl, $header) {
 			$redirectUrl = $url . $redirectUrl;
 		}
 
-		getContentByUrl($redirectUrl);
+		echo "[*] Looks like we're beeing redirected to " . $redirectUrl . "\r";
+		getContentByUrl(trim($redirectUrl));
 	}
  	
     return strlen($header);
