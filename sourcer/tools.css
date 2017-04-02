@@ -2,7 +2,7 @@ body {
 	background: rgba(42,42,55,1);
 	color: rgba(116,191,122,1);
 	padding: 1% 0 1% 1%;
-	font-family: sans-serif;
+	font-family: monospace;
 	margin: 0;
 }
 
@@ -10,9 +10,15 @@ body {
 	float: left;
 }
 
-
 .col2 {
 	width: 36%;
+}
+
+.col2 h2 {
+	height: 37px;
+	box-sizing: border-box;
+	margin: 0 0 29px 0;
+	padding-top: 10px;
 }
 
 .col3 {
@@ -24,7 +30,6 @@ input {
 	margin-bottom: 29px;
 	padding: 10px;
 	border: 1px solid;
-	font-family: monospace;
 }
 
 textarea, input {
@@ -35,7 +40,6 @@ textarea, input {
 }
 
 textarea {
-
 	height: 700px;
 	float: left;
 	padding: 30px;
