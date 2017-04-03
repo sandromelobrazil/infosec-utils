@@ -54,10 +54,12 @@ def printDomains(domains):
     domains = convertStringToJSON(domains)
     
     if domains["count"] > 0:
-        print("\n\n[*] Some associated domains:")
+        print("\n[*] Some associated domains:")
     
         for domain in domains["results"]:
             print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
+    else:
+        print("\n[*] No associated domains found...")
 
 
 def getDNSRecordsByDomain(domain, recordType):
@@ -138,7 +140,7 @@ def getThreatReportsByIP(ip):
 
 def printThreatReports(threatReports):
     if threatReports["count"] > 0:
-        print("\n\n[*] Some historical threat reports for: " + DOMAIN_IP)
+        print("\n[*] Some historical threat reports for: " + DOMAIN_IP)
 
         for report in threatReports["results"]:
             print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).replace(".","[.]").strip())
@@ -148,7 +150,7 @@ def printThreatReports(threatReports):
                     print("More: " + report["details_url"])
             print("\r")
     else:
-        print("\n\n[*] No threat reports found for " + DOMAIN_IP)
+        print("\n[*] No threat reports found for " + DOMAIN_IP)
 
 
 def isValidIPAddress(string):
