@@ -147,7 +147,7 @@ def printThreatReports(threatReports):
             containsDetailsUrl = (report["details_url"] != None)
 
             if containsDetailsUrl:
-                    print("More: " + report["details_url"])
+                print("More: " + report["details_url"])
             print("\r")
     else:
         print("\n[*] No threat reports found for " + DOMAIN_IP)
