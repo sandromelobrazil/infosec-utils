@@ -52,10 +52,12 @@ def getDomainsByIP(ip):
 
 def printDomains(domains):
     domains = convertStringToJSON(domains)
-    print("\n\n[*] Some associated domains:")
     
-    for domain in domains["results"]:
-        print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
+    if domains["count"] > 0:
+        print("\n\n[*] Some associated domains:")
+    
+        for domain in domains["results"]:
+            print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
 
 
 def getDNSRecordsByDomain(domain, recordType):
@@ -89,7 +91,7 @@ def getWhoisRawByDomain(domain):
 
 
 def printRegistrantInfo(registrantInfo, domain):
-    print("\nRegistered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
+    print("Registered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
         "Location:\t" + registrantInfo["country"] + ", " + registrantInfo["state"] + ", " + registrantInfo["city"] + "\n"
         "More:\t\t" + BASE_WHOIS_URL + domain)
 
@@ -163,6 +165,7 @@ def main():
 
     if sys.argv.__len__() > 1:
         domain = sys.argv[1]
+        # domain = "206.220.237.7"
 
         if not isValidIPAddress(domain):
             fetchAllDNSRecordsByDomain(domain)
