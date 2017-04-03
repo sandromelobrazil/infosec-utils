@@ -179,7 +179,6 @@ def main():
 
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
-
     else:
         print("Supply a domain or IPv4 like so: whois.py [domain | IP]")
 
