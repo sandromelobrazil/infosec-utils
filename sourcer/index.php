@@ -1,10 +1,10 @@
 <?php
 
-$url = $_GET["url"];
+$url = strtolower($_GET["url"]);
 getContentByUrl($url);
 
 function getContentByUrl($url) {
-	echo "[*] Attempting " . $url . " ...\n";
+	echo "[*] Connecting to " . $url . " ...\n";
 	$curlHandle = curl_init();
 	curl_setopt($curlHandle, CURLOPT_URL, $url);
 	curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, false);
@@ -19,7 +19,6 @@ function getContentByUrl($url) {
 
 
 function handleHeaderCallback($curl, $header) {
-	$url = $_GET["url"];    
 	$header = strtolower($header);
 	$locationUrl = explode("location: ", $header);	
 
