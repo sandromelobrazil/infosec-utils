@@ -17,8 +17,8 @@ do
     echo "[*] Calculating hashes for files in" $folder
     find $folder* -type f > $MONITORED_FILES_SAVE_LOCATION
 
-    while read -r line; do
-        echo $(md5sum "$line") >> $fimReportFile
+    while read -r filePath; do
+        echo $(md5sum "$filePath") >> $fimReportFile
     done < $MONITORED_FILES_SAVE_LOCATION
 done
 
