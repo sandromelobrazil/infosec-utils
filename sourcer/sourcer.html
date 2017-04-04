@@ -71,7 +71,7 @@ extractDomain = function(string) {
 }
 
 extractUrls = function(string) {
-	var regex = /(https?:\/\/)([.[a-zA-Z/?#=~0-9_:&;-]+)/gi,
+	var regex = /(https?:\/\/)([.[a-zA-Z/?#=~0-9%_:\+&;-]+)/gi,
 		extractedUrls = souceCodeText.match(regex);
 	
 	return convertArrayToStringWithNewLines(extractedUrls);
