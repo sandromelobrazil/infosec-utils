@@ -33,16 +33,23 @@ var sourceCodeTextArea = $('#sourceCodeTextArea'),
 	urlInput.focus();
 
 getSourceCodeByUrl = function(event) {
-// 	todo: remove empty characters from the url;
 	if (event.keyCode == 13) {
-		var url = "index.php?url=" + $(event.target).val(),
-			response = $.get(url, function(data) {
+		var url = "index.php?url=" + $(event.target).val().replace(" ","");
+			
+		response = $.get(url, function(data) {
 			sourceCodeTextArea.val(data);
-			souceCodeText = sourceCodeTextArea.val();
-			extractedUrls = extractUrls(souceCodeText);
-			extractdedDomain = extractDomain(urlInput.val());
-			sanitisedUrls = sanitiseExtractedUrls(extractdedDomain, extractedUrls);
-			extractUrlsTextArea.val(sanitisedUrls);
+			var sourceCodeText = sourceCodeTextArea.val(),
+				extractedUrls = "",
+				extractdedDomain = extractDomain(urlInput.val());
+
+
+			if (hasPasswordField(sourceCodeText)) {
+				extractedUrls = "[!] This website is asking user for a password. Investigate for credential harvesting!\r\n\r";
+			}
+
+			extractedUrls += extractUrls(sourceCodeText);
+			extractedUrls = sanitiseExtractedUrls(extractdedDomain, extractedUrls);
+			extractUrlsTextArea.val(extractedUrls);
 		});
 	}
 }
@@ -60,6 +67,10 @@ sanitiseExtractedUrls = function(domain, extractedUrls) {
 	return convertArrayToStringWithNewLines(sanitisedUrls);	
 }
 
+updateExtractedArtefacts = function (string) {
+
+}
+
 convertArrayToStringWithNewLines = function(urls) {
 	return urls.toString().replace(/\,/g,"\n");
 }
@@ -71,9 +82,13 @@ extractDomain = function(string) {
 	return domain.toLowerCase();
 }
 
+hasPasswordField = function(string) {
+	return (string.indexOf('type="password"') > 0) ? true : false;
+}
+
 extractUrls = function(string) {
 	var regex = /(https?:\/\/)([.[a-zA-Z/?#=~0-9%_:\+&;-]+)/gi,
-		extractedUrls = souceCodeText.match(regex);
+		extractedUrls = string.match(regex);
 	
 	return convertArrayToStringWithNewLines(extractedUrls);
 }
