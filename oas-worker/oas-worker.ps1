@@ -23,11 +23,13 @@ function openCSV() {
 }
 
 function generateSplunkSearchQueryFromThreatAttributes($OASevent) {
+    $ignoreEvents = " NOT (png OR jpg OR gif OR ico OR css OR tunnel)"
     $eventTime = [datetime] $OASevent."Event Generated Time"
     $targetIP = $OASevent."Threat Target IPv4 Address"
     $startTime = $eventTime.AddSeconds(-12).ToString($TIME_FORMAT)
     $endTime = $eventTime.ToString($TIME_FORMAT)
-    $splunkSearchQuery = "starttime=" + [string] $startTime + " endtime=" + [string] $endTime + " " + $targetIP
+    $splunkSearchQuery = "starttime=" + [string] $startTime + " endtime=" + [string] $endTime + " " + $targetIP + $ignoreEvents
+    
     return $splunkSearchQuery
 }
 
