@@ -33,6 +33,7 @@ var sourceCodeTextArea = $('#sourceCodeTextArea'),
 	urlInput.focus();
 
 getSourceCodeByUrl = function(event) {
+// 	todo: remove empty characters from the url;
 	if (event.keyCode == 13) {
 		var url = "index.php?url=" + $(event.target).val(),
 			response = $.get(url, function(data) {
