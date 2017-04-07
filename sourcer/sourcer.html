@@ -68,7 +68,7 @@ sanitiseExtractedUrls = function(domain, extractedUrls) {
 }
 
 convertArrayToStringWithNewLines = function(urls) {
-	return urls.toString().replace(/\,/g,"\n");
+	return urls.join("\n");
 }
 
 extractDomain = function(string) {

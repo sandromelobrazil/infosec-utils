@@ -1,8 +1,11 @@
+html, input {
+	font-family: monospace;
+}
+
 body {
 	background: rgba(42,42,55,1);
 	color: rgba(116,191,122,1);
 	padding: 1% 0 1% 1%;
-	font-family: monospace;
 	margin: 0;
 }
 
@@ -29,14 +32,14 @@ body {
 input {
 	margin-bottom: 29px;
 	padding: 10px;
-	border: 1px solid;
 }
 
 textarea, input {
 	background: rgba(255,255,255,.05);
 	color: rgba(255,255,255,.6);
 	width: 100%;
-	white-space: nowrap;
+	border: 1px solid;
+	font-size: 1em;
 }
 
 textarea {
