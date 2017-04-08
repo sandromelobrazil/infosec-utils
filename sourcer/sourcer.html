@@ -8,21 +8,17 @@
     </head>
 
     <body>
-		<h1>Source Code Viewer</h1>
 		<div id="main-wrapper">		
 			<div class="col col3">
-					<input id="url" placeholder="Enter URL and hit enter" onkeyup="getSourceCodeByUrl(event)" text/>
-					<textarea id="sourceCodeTextArea" onclick="">Source code will be shown here..</textarea>	
+				<input id="url" placeholder="Enter URL and hit enter" onkeyup="getSourceCodeByUrl(event)" text/>
+				<textarea id="sourceCodeTextArea" onclick="">Source code will be shown here..</textarea>	
 			</div>		
 			<div class="col col2">
-				<h2>External URLs</h2>
-
-					<textarea id="extractedUrlsTextArea" onclick="">Extracted URLs will be shown here..</textarea>	
+				<h3>External URLs</h2>
+				<textarea id="extractedUrlsTextArea" onclick="">Extracted URLs will be shown here..</textarea>	
 			</div>		
 		</div>
-
 	</body>
-	
 </html>
 
 
@@ -44,7 +40,7 @@ getSourceCodeByUrl = function(event) {
 
 
 			if (hasPasswordField(sourceCodeText)) {
-				extractedUrls = "[!] This website is asking user for a password. Investigate for credential harvesting!\r\n\r";
+				extractedUrls = "[!] This website is asking user for a password. Investigate for credential harvesting!\r\n\r\n";
 			}
 
 			extractedUrls += extractUrls(sourceCodeText);

@@ -1,11 +1,10 @@
-html, input {
+html, input, textarea {
 	font-family: monospace;
+	color: rgba(117, 183, 172, 0.88);
 }
 
 body {
 	background: rgba(42,42,55,1);
-	color: rgba(116,191,122,1);
-	padding: 1% 0 1% 1%;
 	margin: 0;
 }
 
@@ -14,44 +13,53 @@ body {
 }
 
 .col2 {
-	width: 36%;
+	width: 33%;
 }
 
-.col2 h2 {
-	height: 37px;
+#url {
+	background: rgba(99, 193, 179, 0.15);
+}
+
+#url, .col2 h3 {
+	height: 3%;
+	border-bottom: none;
+}
+
+.col2 h3 {
 	box-sizing: border-box;
-	margin: 0 0 29px 0;
 	padding-top: 10px;
+	margin-left: 30px;
 }
 
 .col3 {
-	width: 62%;
-	margin-right: 1%;
+	width: 67%;
 }
 
 input {
-	margin-bottom: 29px;
-	padding: 10px;
+	padding: 10px 30px;
 }
 
 textarea, input {
 	background: rgba(255,255,255,.05);
-	color: rgba(255,255,255,.6);
 	width: 100%;
 	border: 1px solid;
 	font-size: 1em;
 }
 
 textarea {
-	height: 700px;
 	float: left;
 	padding: 30px;
 }
 
+#extractedUrlsTextArea {
+	border-left: none;
+}
+
 #sourceCodeTextArea, #extractedUrlsTextArea {
-	height: 90%;
+	height: 97%;
 }
 
 h1, h2, h3 {
 	text-transform: capitalize;
+	margin: 0;
 }
