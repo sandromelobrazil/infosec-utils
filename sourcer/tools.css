@@ -23,6 +23,7 @@ body {
 #url, .col2 h3 {
 	height: 3%;
 	border-bottom: none;
+	min-height: 40px;
 }
 
 .col2 h3 {
