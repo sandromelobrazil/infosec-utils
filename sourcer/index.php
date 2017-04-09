@@ -1,6 +1,6 @@
 <?php
 
-$url = strtolower($_GET["url"]);
+$url = $_GET["url"];
 getContentByUrl($url);
 
 function getContentByUrl($url) {
@@ -19,7 +19,7 @@ function getContentByUrl($url) {
 
 
 function handleHeaderCallback($curl, $header) {
-	$url = strtolower($_GET["url"]);
+	$url = $_GET["url"];
 	$header = strtolower($header);
 	$locationUrl = explode("location: ", $header);	
 
@@ -29,7 +29,7 @@ function handleHeaderCallback($curl, $header) {
 		$redirectUrl = $locationUrl[1];
 
 		if (strpos($redirectUrl, "http") !== 0) {
-			$redirectUrl = $url . "/" . $redirectUrl;
+			$redirectUrl = $url . "/" . $redirectUrl;		
 		}
 
 		echo "[*] Looks like we're being redirected to " . $redirectUrl . "\r";
