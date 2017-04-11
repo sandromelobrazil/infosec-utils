@@ -75,7 +75,7 @@ extractDomain = function(string) {
 }
 
 hasPasswordField = function(string) {
-	return (string.indexOf('type="password"') > 0) ? true : false;
+	return (string.match(/type\s?=\s?"?'?password/gi)) ? true : false;
 }
 
 extractUrls = function(string) {
