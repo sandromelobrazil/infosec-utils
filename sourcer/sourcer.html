@@ -29,7 +29,6 @@ var sourceCodeTextArea = $('#sourceCodeTextArea'),
 	urlInput.focus();
 
 getSourceCodeByUrl = function(event) {
-// 	http://holonchile.cl/now/newoutlook/new+outlook/new+outlook make sure this url works
 	if (event.keyCode == 13) {
 		var url = "index.php?url=" + $(event.target).val().replace(" ","");
 			
