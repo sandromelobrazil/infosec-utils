@@ -3,6 +3,7 @@
 
 Param(
     [string] $url,
+    [switch] $domainonly,
     [switch] $ironportonly
 )
 
@@ -20,6 +21,9 @@ $Global:HEADERS = @{
 
 function processCommandLineParams($url) {
     if ($url -ne "") {
+        if ($domainonly) {
+            $url = (extractDomainFromURL $url)
+        }
         if ($ironportonly) {
             Write-Host "Counting events in IronPort for:" $url
             $Global:shouldFetchIrontPortEventsCount = $true
@@ -78,13 +82,12 @@ function sendPOSTRequest($URL, $parameters, $headers) {
 
 function getVirusTotalReportForURL($targetURL) {
     $baseUrl = "http://www.virustotal.com/vtapi/v2/url/report"
-    $apiKey = "x"
-    $domain = extractDomainFromURL $targetURL
-    $sanitisedDomain = sanitiseURL $domain
+    $apiKey = "3c38b131e208664c2c49b6c071670bc777a8c295e5e711197c42f230380cc6a1"
+    $sanitisedURL = sanitiseURL $targetURL
 
     $requestParameters = @{
         apikey = $apiKey
-        resource = $domain
+        resource = $targetURL
     }
 
     $response = sendPOSTRequest $baseUrl $requestParameters
@@ -110,7 +113,7 @@ function getVirusTotalReportForURL($targetURL) {
     } else {
         $finalReport = "VirusTotal - Not found in the dataset."
     }
-    $finalReport += " ( " + $sanitisedDomain + " )"
+    $finalReport += " ( " + $sanitisedURL + " )"
 
     return $finalReport
 }
