@@ -75,6 +75,7 @@ extractDomain = function(string) {
 }
 
 hasPasswordField = function(string) {
+// 	needs to be case-insensitive of course;
 	return (string.indexOf('type="password"') > 0) ? true : false;
 }
 
