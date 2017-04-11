@@ -11,6 +11,7 @@ BASE_CYMON_URL = "https://cymon.io/api/nexus/v1/ip/"
 def sendGetRequest(url):
     headers = {"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a"}
     request = urllib.request.Request(url, headers=headers)
+    
     try:
         response = urllib.request.urlopen(request).read().decode("utf-8")
     except:
