@@ -50,6 +50,8 @@ getSourceCodeByUrl = function(event) {
 	}
 }
 
+// todo check for window.location and similar type of redirects and notify
+
 sanitiseExtractedUrls = function(domain, extractedUrls) {
 	sanitisedUrls = [];
 	extractedUrls = extractedUrls.split("\n");
