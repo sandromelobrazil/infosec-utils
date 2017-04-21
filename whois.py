@@ -1,23 +1,30 @@
 #!/bin/python3.5
-# HKEY_CLASSES_ROOT\Python.File\Shell\open\command
+# todo: add the remote nslookup for the ip
 import urllib.request
 import json
 import sys
 import socket
+from urllib.error import URLError
+from urllib.error import HTTPError
 
 BASE_WHOIS_URL = "https://www.whois.com/whois/"
 BASE_CYMON_URL = "https://cymon.io/api/nexus/v1/ip/"
 
-def sendGetRequest(url):
-    headers = {"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a"}
-    request = urllib.request.Request(url, headers=headers)
-    
+def sendHttpRequest(request):
     try:
         response = urllib.request.urlopen(request).read().decode("utf-8")
+    except HTTPError as httperror:
+        return httperror
+    except URLError as urlerror:
+         return urlerror
     except:
         print("Domain or IP you supplied may not be in correct format..")
         exit(1)
     return response
+
+def buildHTTPRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "Accept": "application/json"}, data=None):
+    httpRequest = urllib.request.Request(url, data=data, headers=headers)
+    return httpRequest
 
 
 def fetchAllDNSRecordsByDomain(domain):
@@ -38,7 +45,7 @@ def fetchAllDNSRecordsByDomain(domain):
 def getIPFromDNSRecord(dnsRecords, record):
     global DOMAIN_IP
     try:
-        if record == "A" and  DOMAIN_IP == None:
+        if record == "A" and DOMAIN_IP == None:
             DOMAIN_IP = dnsRecords[0]["value"]
     except:
         print("Domain you entered could not be resolved, check spelling.")
@@ -47,7 +54,8 @@ def getIPFromDNSRecord(dnsRecords, record):
 
 def getDomainsByIP(ip):
     url = BASE_CYMON_URL + ip + "/domains/"
-    domainsRaw = sendGetRequest(url)
+    request = buildHTTPRequest(url)
+    domainsRaw = sendHttpRequest(request)
     return domainsRaw
 
 
@@ -56,7 +64,6 @@ def printDomains(domains):
     
     if domains["count"] > 0:
         print("\n[*] Some associated domains:")
-    
         for domain in domains["results"]:
             print(domain["name"] + "\t\t(created: " + domain["created"] + ")")
     else:
@@ -67,7 +74,8 @@ def getDNSRecordsByDomain(domain, recordType):
     baseUrl = "https://dns-api.org/"
     recordType += "/"
     url = baseUrl + recordType + domain
-    dnsRecordsRaw = sendGetRequest(url)
+    request = buildHTTPRequest(url)
+    dnsRecordsRaw = sendHttpRequest(request)
     return dnsRecordsRaw
 
 
@@ -88,9 +96,9 @@ def convertStringToJSON(string):
 
 def getWhoisRawByDomain(domain):
     url = BASE_WHOIS_URL + domain
-    whoisResponseRaw = sendGetRequest(url)
+    request = buildHTTPRequest(url)
+    whoisResponseRaw = sendHttpRequest(request)
     return whoisResponseRaw
-
 
 
 def printRegistrantInfo(registrantInfo, domain):
@@ -115,7 +123,6 @@ def getRegistrantInfo(whoisRawData):
 
     registrantInfoValues = replaceEmptyItemsWithPlaceholders(registrantInfoValues)
     registrantInfo = dict(zip(registrantInfoKeys, registrantInfoValues))
-
     return registrantInfo
 
 
@@ -134,7 +141,8 @@ def getRegistrantDataByAttribute(whoisRawData, attribute):
 
 def getThreatReportsByIP(ip):
     url = BASE_CYMON_URL + ip + "/events"
-    response = sendGetRequest(url)
+    request = buildHTTPRequest(url)
+    response = sendHttpRequest(request)
     threatsReports = convertStringToJSON(response)
     return threatsReports
 
@@ -162,13 +170,34 @@ def isValidIPAddress(string):
         return False
 
 
+def getHostNameByIp(IP):
+    url = "http://network-tools.com/default.asp?prog=dnsrec&host=" + IP
+    headers = {
+        "Accept": "text/html",
+        "Content-type": "application/json",
+    }
+
+    request = buildHTTPRequest(url, headers=headers)
+    response = sendHttpRequest(request)
+    hostname = extractCanonicalName(response)
+    return hostname
+
+def extractCanonicalName(string):
+    hostname = string.split("canonical name: ")[1]
+    hostname = hostname.split("<br/>")[0]
+    return hostname
+
+
+def printHostName(hostname):
+    print("[*] Reverse DNS lookup:\n" + hostname)
+
+
 def main():
     global DOMAIN_IP
     DOMAIN_IP = None
 
     if sys.argv.__len__() > 1:
         domain = sys.argv[1]
-        # domain = "206.220.237.7"
 
         if not isValidIPAddress(domain):
             fetchAllDNSRecordsByDomain(domain)
@@ -177,8 +206,11 @@ def main():
             printRegistrantInfo(registrantInfo, domain)
         else:
             DOMAIN_IP = domain
+            hostname = getHostNameByIp(DOMAIN_IP)
+            printHostName(hostname)
             domainsRaw = getDomainsByIP(DOMAIN_IP)
             printDomains(domainsRaw)
+
 
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
