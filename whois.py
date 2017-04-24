@@ -182,14 +182,21 @@ def getHostNameByIp(IP):
     hostname = extractCanonicalName(response)
     return hostname
 
+
 def extractCanonicalName(string):
-    hostname = string.split("canonical name: ")[1]
-    hostname = hostname.split("<br/>")[0]
+    anchor = "canonical name: "
+    
+    if anchor in string:
+        hostname = string.split(anchor)[1]
+        hostname = hostname.split("<br/>")[0]
+    else:
+        hostname = "[*] Could not resolve to hostname..."
+
     return hostname
 
 
 def printHostName(hostname):
-    print("[*] Reverse DNS lookup:\n" + hostname)
+    print("[*] Resolving to hostname...\n" + hostname)
 
 
 def main():
