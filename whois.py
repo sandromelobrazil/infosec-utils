@@ -1,5 +1,4 @@
 #!/bin/python3.5
-# todo: add the remote nslookup for the ip
 import urllib.request
 import json
 import sys
