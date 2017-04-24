@@ -15,7 +15,7 @@ function getContentByUrl($url) {
 	$response = curl_exec($curlHandle);
 	curl_close($curlHandle);
 
-	echo $response;
+	echo htmlentities($response);
 }
 
 
