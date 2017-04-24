@@ -22,7 +22,7 @@ def sendHttpRequest(request):
         exit(1)
     return response
 
-def buildHTTPRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "Accept": "application/json"}, data=None):
+def buildHttpRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "Accept": "application/json"}, data=None):
     httpRequest = urllib.request.Request(url, data=data, headers=headers)
     return httpRequest
 
@@ -54,7 +54,7 @@ def getIPFromDNSRecord(dnsRecords, record):
 
 def getDomainsByIP(ip):
     url = BASE_CYMON_URL + ip + "/domains/"
-    request = buildHTTPRequest(url)
+    request = buildHttpRequest(url)
     domainsRaw = sendHttpRequest(request)
     return domainsRaw
 
@@ -74,7 +74,7 @@ def getDNSRecordsByDomain(domain, recordType):
     baseUrl = "https://dns-api.org/"
     recordType += "/"
     url = baseUrl + recordType + domain
-    request = buildHTTPRequest(url)
+    request = buildHttpRequest(url)
     dnsRecordsRaw = sendHttpRequest(request)
     return dnsRecordsRaw
 
@@ -96,7 +96,7 @@ def convertStringToJSON(string):
 
 def getWhoisRawByDomain(domain):
     url = BASE_WHOIS_URL + domain
-    request = buildHTTPRequest(url)
+    request = buildHttpRequest(url)
     whoisResponseRaw = sendHttpRequest(request)
     return whoisResponseRaw
 
@@ -141,7 +141,7 @@ def getRegistrantDataByAttribute(whoisRawData, attribute):
 
 def getThreatReportsByIP(ip):
     url = BASE_CYMON_URL + ip + "/events"
-    request = buildHTTPRequest(url)
+    request = buildHttpRequest(url)
     response = sendHttpRequest(request)
     threatsReports = convertStringToJSON(response)
     return threatsReports
@@ -177,7 +177,7 @@ def getHostNameByIp(IP):
         "Content-type": "application/json",
     }
 
-    request = buildHTTPRequest(url, headers=headers)
+    request = buildHttpRequest(url, headers=headers)
     response = sendHttpRequest(request)
     hostname = extractCanonicalName(response)
     return hostname
