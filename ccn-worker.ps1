@@ -22,18 +22,31 @@ function main() {
         $extractedFolder = extractZipFile $Global:PATH_TO_CCN
         getCCNsFromFolder $extractedFolder
     } else {
-        $rawCCNData = getRawDumpFromURL $Global:PATH_TO_CCN
-        getCCNsFromRawDump $rawCCNData
+        if ($Global:PATH_TO_CCN -ne $null) {
+            $Global:PATH_TO_CCN = $Global:PATH_TO_CCN -replace("https","http")
+            $rawCCNData = getRawDumpFromURL $Global:PATH_TO_CCN
+            getCCNsFromRawDump $rawCCNData
+        } else {
+            printHelp
+        }
     }
-
+    
+    Write-Host "[*] Looking for CCN-like numbers..."
     Write-Host $Global:CCN_LIST
     Write-Host "CCNs found:" $Global:CCN_COUNTER '(Source'$Global:PATH_TO_CCN')'
+   
     saveExtractedCCNsToFile
     openCSIRTTools
 }
 
-function openCSIRTTools() {
-    Start-Process -FilePath "http://x"
+function printHelp() {
+    Write-Host "[*] Please supply a path to CCN data as an argument, i.e. ccn-worker.ps1 'PATH_TO_CCN_DATA'`n
+    [!] PATH_TO_CCN_DATA could be one of the following:`r
+    [1] URL, i.e. - http://pastebin.com/raw/Zfwg4hww`r
+    [2] Path to a folder with CCN data (txt files) is stored, i.e - C:\CCNs`r
+    [3] Path to a zip file containin CNN data, i.e - C:\Downloads\CCN.zip`n
+    [i] Example: ccn-worker.ps1 http://pastebin.com/raw/Zfwg4hww"
+    break
 }
 
 function saveExtractedCCNsToFile() {
