@@ -53,11 +53,11 @@ function printHelp() {
         -procs`t`t Get running processes
         -conns`t`t Get established connections
         -users`t`t Get users who have used the machine / Last Accessed Time
-        -regquery`t Query registry by a key. Use -key to specify the key
+        -regquery`t Get registry key. Use -key to specify the key
         -autoruns`t Get autoruns
         -prefetch`t Get prefetches / Last Accessed Time
         -recent`t`t Get recently accessed items / Last Accessed Time
-        -typedurl`t`t Get Explorer typed URLs
+        -typedurl`t Get Explorer typed URLs
         -dnscache`t Get DNS cache entries"
         break
 }
