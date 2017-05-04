@@ -25,7 +25,6 @@ $Global:SERVICE_ID = $serviceID
 $Global:PASSWORD = $password
 
 function main() {
-    removeCredentials
     processArguments
     storeCredentialsForRemoteHost $remoteHost
     # copyUtilsToRemoteHost $remoteHost
