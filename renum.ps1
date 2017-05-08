@@ -1,9 +1,7 @@
 param(
     [string]$remoteHost,
     [string]$user,
-    [string]$serviceID,
     [string]$password,
-
     [switch]$shell,
     [switch]$arp,
     [switch]$ipcfg,
@@ -18,13 +16,17 @@ param(
     [switch]$prefech,
     [switch]$typedurl,
     [switch]$recent,
+    [switch]$downloads,
+    [switch]$desktop,
     [switch]$dnscache
 )
 
-$Global:SERVICE_ID = $serviceID
-$Global:PASSWORD = $password
+$Global:SERVICE_ID = "x"
+$Global:PASSWORD = 'x'
+$Global:COMMAND_SPECIFIED = $false
 
 function main() {
+    changeWorkingDirectory
     processArguments
     storeCredentialsForRemoteHost $remoteHost
     # copyUtilsToRemoteHost $remoteHost
@@ -35,6 +37,7 @@ function main() {
 
     enumerateSystem $remoteHost   
     # collectArtefacts $remoteHost $user
+    
     removeCredentials
 }
 
@@ -43,21 +46,27 @@ function removeCredentials() {
 }
 
 function printHelp() {
-        Write-Host [!] Specify remote host with -remoteHost [host]!
-        Write-Host "[!] Available switches:`n
+        Write-Host "`r"
+        Write-Host "[*] REnum (RemoteEnumeration) is a collection of convenience functions to speed-up an investigtion." -ForegroundColor Cyan
+        Write-Host [!] Specify remote host with -remoteHost [host] and the -[command] you want to execute.`n[i] Example: renum-v0.1.ps1 -remoteHost 127.0.0.1 -ipcfg to get remote machine IP configuration.
+        Write-Host "[!] Available commands:`n
+        Tip:`t`t Omit the command to open C$ share
         -shell`t`t Get remote shell
         -arp`t`t Get ARP table
         -ipcfg`t`t Get IP configuration
         -route`t`t Get routing tables
         -procs`t`t Get running processes
-        -conns`t`t Get established connections
-        -users`t`t Get users who have used the machine / Last Accessed Time
-        -regquery`t Get registry key. Use -key to specify the key
+        -conns`t`t Get established connections & ports listening
+        -users`t`t Get users who have used the machine / Last Accessed Time shown
+        -regquery`t Get registry key info. Use -key to specify the key
         -autoruns`t Get autoruns
-        -prefetch`t Get prefetches / Last Accessed Time
-        -recent`t`t Get recently accessed items / Last Accessed Time
-        -typedurl`t Get Explorer typed URLs
-        -dnscache`t Get DNS cache entries"
+        -usbenum`t Get USB devices that had been plugged
+        -downloads`t Get contents of downloads folder / Last Accessed Time shown
+        -desktop`t Get contents of desktop / Last Accessed Time shown
+        -prefetch`t Get prefetches / Last Accessed Time shown.
+        -recent`t`t Get recently accessed documents / Last Accessed Time shown
+        -typedurl`t Get URLs that were typed in Explorer and IE
+        -dnscache`t Get DNS cache entries`n"
         break
 }
 
@@ -70,6 +79,7 @@ function processArguments() {
 function getIPConfig($remoteHost) {
     $command = "C:\Windows\system32\ipconfig.exe /all"
     executeRemotePsExec $remoteHost $command
+    return $true
 }
 
 function getRoutingTable($remoteHost) {
@@ -87,11 +97,15 @@ function getUsers($remoteHost) {
     executeRemotePsExec $remoteHost $command
 }
 
-function getRecentItems($remoteHost) {
+function isUserSpecified() {
     if ($user -eq "" -or $user -eq $null) {
-        Write-Host [!] Specify username with -user
+        Write-Host "[!] Specify username with -user. Tip: you can run -users to get users who had engaged with this machine."
         break
     }
+}
+
+function getRecentItems($remoteHost) {
+    isUserSpecified
     $command = "dir /TA /A:-D C:\Users\$user\AppData\Roaming\Microsoft\Windows\Recent"
     executeRemotePsExec $remoteHost $command
 }
@@ -121,8 +135,24 @@ function getPrefetches($remoteHost) {
     executeRemotePsExec $remoteHost $command
 }
 
+function getDownloads($remoteHost) {
+    isUserSpecified
+    $command = "dir C:\Users\$user\Downloads /TA"
+    executeRemotePsExec $remoteHost $command
+}
+
+function getDesktop($remoteHost) {
+    isUserSpecified
+    $command = "dir C:\Users\$user\Desktop /TA"
+    executeRemotePsExec $remoteHost $command
+}
+
 function getUSBEnum($remoteHost) {
-    $keys = @('HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Enum\USBSTOR', 'HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Enum\USBSTOR')
+    $keys = @(
+    'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR',    
+    'HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Enum\USBSTOR', 
+    'HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Enum\USBSTOR')
+
     $keys | ForEach-Object {
         $command = 'C:\Windows\system32\reg.exe query ' + $_
         executeRemotePsExec $remoteHost $command
@@ -139,7 +169,7 @@ function getAutoruns($remoteHost) {
 
 function queryRegKey($remoteHost, $key) {
     if ($key -eq "" -or $key -eq $null) {
-        Write-Host [!] Specify a key you want to query qith -regkey
+        Write-Host [!] Specify a key you want to query with -key
         break
     }
     $command = 'C:\Windows\system32\reg.exe query "' + $key + '"'
@@ -186,18 +216,32 @@ function enumerateSystem($remoteHost) {
     if ($recent) {
         getRecentItems $remoteHost
     }
+    if ($downloads) {
+        getDownloads $remoteHost
+    }
+    if ($desktop) {
+        getDesktop $remoteHost
+    }
+
+    if (!$Global:COMMAND_SPECIFIED) {
+        Write-Host "[i] Command not specified, opening share \\$remoteHost\C$"
+        Invoke-Item \\$remoteHost\c$
+    }
+}
+
+function changeWorkingDirectory() {
+    Set-Location $MyInvocation.PSScriptRoot
 }
 
 function executeRemotePsExec($remoteHost, $command) {
-    psexec.exe \\$remoteHost -u $Global:SERVICE_ID -p $Global:PASSWORD -s cmd /c $command
+    $Global:COMMAND_SPECIFIED = $true
+    .\utils\psexec.exe \\$remoteHost -u $Global:SERVICE_ID -p $Global:PASSWORD -s cmd /c $command
 }
 
 function collectArtefacts($remoteHost, $user) {
-    # $lockedArtefacts = @("C:\Users\$user\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat")
+    $lockedArtefacts = @("C:\Users\$user\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat")
     
     $unlockedArtefacts = @(
-        "C:\ProgramData\McAfee\DesktopProtection", 
-        "C:\Quarantine", 
         "C:\Users\$user\AppData\Local\Mozilla\Firefox\Profiles",
         "C:\Users\$user\AppData\Local\Google\Chrome\User Data\Default\Cache"
     )
@@ -226,7 +270,8 @@ function downloadArtefact($remoteHost, $artefactName, $isLocked) {
         $artefactLocation = Split-Path $artefactName -NoQualifier
         $artefactSourceLocation = "\\$remoteHost\c$" + $artefactLocation
     }
-    Copy-Item $artefactSourceLocation -Destination C:\Users\Documents\Scripts\artefacts-worker\$remoteHost\ -Force -Recurse
+    # Copy-Item \\$workstation\c$\Quarantine\ -Destination $Dest -Force -Recurse
+    Copy-Item $artefactSourceLocation -Destination C:\Users\artefacts\$remoteHost\ -Force -Recurse
 }
 
 function copyUtilsToRemoteHost($remoteHost) {
