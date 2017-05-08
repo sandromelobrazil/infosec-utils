@@ -48,8 +48,8 @@ function removeCredentials() {
 function printHelp() {
         Write-Host "`r"
         Write-Host "[*] REnum (RemoteEnumeration) is a collection of convenience functions to speed-up an investigtion." -ForegroundColor Cyan
-        Write-Host [!] Specify remote host with -remoteHost [host] and the -[command] you want to execute.`n[i] Example: renum-v0.1.ps1 -remoteHost 127.0.0.1 -ipcfg to get remote machine IP configuration.
-        Write-Host "[!] Available commands:`n
+        Write-Host [i] Specify remote host with -remoteHost [host] and the -[command] you want to execute.`n[i] Example: renum-v0.1.ps1 -remoteHost 127.0.0.1 -ipcfg to get remote machine IP configuration.`n
+        Write-Host "[i] Available commands:`n
         Tip:`t`t Omit the command to open C$ share
         -shell`t`t Get remote shell
         -arp`t`t Get ARP table
@@ -60,10 +60,10 @@ function printHelp() {
         -users`t`t Get users who have used the machine / Last Accessed Time shown
         -regquery`t Get registry key info. Use -key to specify the key
         -autoruns`t Get autoruns
-        -usbenum`t Get USB devices that had been plugged
+        -usbenum`t Get USB devices that had been plugged in
         -downloads`t Get contents of downloads folder / Last Accessed Time shown
         -desktop`t Get contents of desktop / Last Accessed Time shown
-        -prefetch`t Get prefetches / Last Accessed Time shown.
+        -prefetch`t Get prefetches / Last Accessed Time shown
         -recent`t`t Get recently accessed documents / Last Accessed Time shown
         -typedurl`t Get URLs that were typed in Explorer and IE
         -dnscache`t Get DNS cache entries`n"
