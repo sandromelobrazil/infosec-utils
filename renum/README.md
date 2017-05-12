@@ -1,3 +1,4 @@
+# infosec-utils
        REnum (RemoteEnumeration) is a collection of convenience functions to speed-up an investigtion.
        Write-Host [i] Specify remote host and -[command] you want to execute.`n[i] Example: renum-v0.1.ps1 127.0.0.1 -ipcfg to get remote machine IP configuration.
        Write-Host "[i] Available commands:
