@@ -1,37 +1,32 @@
-﻿Param(
-    [string] $forgiveness
+Param(
+    [string] $forgiveness,
+    # -hostname can be used when you want to check if we've had historical similarly named devices in whitelists or blacklists
+    [string] $hostname 
 )
 
 $Global:MAX_ATTEMPTS = 7
 $Global:WHITELIST_BLACKLIST_PAYLOAD = ""
 
-if ($forgiveness -ne "") {
-    $Global:MAX_ATTEMPTS = $forgiveness
-}
 
-function setupPathsToDataSources() {
-    $prompt = "Specify absolute path to a folder containing all required files"
-    $directoryLocation = Read-Host -Prompt $prompt
-    # $directoryLocation = "C:\"
-    
-    if ($directoryLocation -ne "" -and $directoryLocation -like "*C:\*") {
-        $Global:FILTERED_DEVICES = $directoryLocation + "\*.csv"
-        $Global:MAC_WHITELIST = $directoryLocation + "\.txt"
-        $Global:MAC_BLACKLIST = $directoryLocation + "\.txt"
-        $Global:MACHINE_NAME_WHITELIST = $directoryLocation + "\.txt"
-        $Global:MACHINE_NAME_BLACKLIST = $directoryLocation + "\.txt"
-    } else {
-        Write-Host $prompt
-        setupPathsToDataSources
+function processArguments() {
+    if ($forgiveness -ne "") {
+        $Global:MAX_ATTEMPTS = $forgiveness
+    }
+    if ($hostname -ne "") {
+        checkDeviceByHostname $hostname
     }
 }
 
 function main() {
     setupPathsToDataSources
     [array] $filteredDevices = ConvertFrom-Csv (Get-Content $Global:FILTERED_DEVICES)
-    Write-Host "[*] Reading filtered devices list..."
-    processFilteredDevices $filteredDevices
-    printPotentialPayload
+    
+    # if the -hostname is not provided, the script will process the filtered devices .csv file.
+    if ($hostname -eq "") {
+        Write-Host "[*] Reading filtered devices list..."
+        processFilteredDevices $filteredDevices
+        printPotentialPayload
+    }
 }
 
 function processFilteredDevices($filteredDevices) {
@@ -51,6 +46,13 @@ function processFilteredDevices($filteredDevices) {
     } else {
         Write-Host "[*] No filtered devices found..."
     }
+}
+
+function checkDeviceByHostname($hostname) {
+    [array] $device = @{
+        infoblox_MachineName = $hostname
+    }
+    processFilteredDevices $device    
 }
 
 function printPotentialPayload() {
