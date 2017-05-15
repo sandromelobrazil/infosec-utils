@@ -19,6 +19,7 @@ function processArguments() {
 
 function main() {
     setupPathsToDataSources
+    processArguments
     [array] $filteredDevices = ConvertFrom-Csv (Get-Content $Global:FILTERED_DEVICES)
     
     # if the -hostname is not provided, the script will process the filtered devices .csv file.
