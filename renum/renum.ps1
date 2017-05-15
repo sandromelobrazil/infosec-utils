@@ -235,7 +235,7 @@ function getTypedURLs($remoteHost) {
     executePSModule $Global:MODULES.typedurls $remoteHost $arguments
 }
 
-function getModule ($moduleName) {
+function getModuleInfo ($moduleName) {
     $module = @{
         fileName = $moduleName + ".ps1"
         path = $Global:MODS_PATH + $moduleName + ".ps1"
@@ -244,7 +244,7 @@ function getModule ($moduleName) {
 }
 
 function executePSModule($moduleName, $remoteHost, $arguments) {
-    $module = getModule $moduleName
+    $module = getModuleInfo $moduleName
     $moduleSourcePath = $module.path
     
     $destinationFolder = "temp\"
