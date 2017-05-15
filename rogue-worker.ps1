@@ -25,7 +25,7 @@ function main() {
     # if the -hostname is not provided, the script will process the filtered devices .csv file.
     if ($hostname -eq "") {
         Write-Host "[*] Reading filtered devices list..."
-        processFilteredDevices $filteredDevices
+        $containsSimilarDevices = processFilteredDevices $filteredDevices
         printPotentialPayload
     }
 }
@@ -33,27 +33,38 @@ function main() {
 function processFilteredDevices($filteredDevices) {
     [int] $index = 1
     [int] $devicesCount = $filteredDevices.Length
+    $isSimilarDeviceFound = $false
+    [array] $filesToCheck = @($Global:MACHINE_NAME_WHITELIST, $Global:MAC_WHITELIST, $Global:MAC_BLACKLIST, $Global:MACHINE_NAME_BLACKLIST)
 
     if ($devicesCount -gt 0) {
         $filteredDevices.ForEach({
             $filteredDevice = $_
             Write-Host "`n`n[ $index/$devicesCount ] Processing filtered device:" $filteredDevice.infoblox_MachineName -ForegroundColor Cyan
-            findSimilarDevices $filteredDevice $Global:MACHINE_NAME_WHITELIST   
-            findSimilarDevices $filteredDevice $Global:MAC_WHITELIST   
-            findSimilarDevices $filteredDevice $Global:MAC_BLACKLIST   
-            findSimilarDevices $filteredDevice $Global:MACHINE_NAME_BLACKLIST
+            
+            foreach($file in $filesToCheck) {
+                $constainsSimilar = findSimilarDevices $filteredDevice $file
+                if ($isSimilarDeviceFound -eq $false -and $constainsSimilar -eq $true) {
+                    $isSimilarDeviceFound = $true
+                }
+            }
             $index++
         })
     } else {
         Write-Host "[*] No filtered devices found..."
     }
+
+    return $isSimilarDeviceFound
 }
 
 function checkDeviceByHostname($hostname) {
     [array] $device = @{
         infoblox_MachineName = $hostname
     }
-    processFilteredDevices $device    
+    $isSimilarDeviceFound = processFilteredDevices $device    
+
+    if (!$isSimilarDeviceFound) {
+        Write-Host `n[*] No similar devices found...
+    }
 }
 
 function printPotentialPayload() {
