@@ -236,11 +236,11 @@ function getTypedURLs($remoteHost) {
 }
 
 function getModuleInfo ($moduleName) {
-    $module = @{
+    $moduleInfo = @{
         fileName = $moduleName + ".ps1"
         path = $Global:MODS_PATH + $moduleName + ".ps1"
     }
-    return $module
+    return $moduleInfo
 }
 
 function executePSModule($moduleName, $remoteHost, $arguments) {
