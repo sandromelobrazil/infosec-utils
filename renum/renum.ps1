@@ -36,10 +36,12 @@ $Global:PASSWORD = 'x'
 $Global:COMMAND_SPECIFIED = $false
 $Global:MODS_PATH = ".\mods\"
 $Global:UTILS_PATH = ".\utils\"
-$Global:SYS_ROOT_PATH = "C:\Windows\system32\"
 $Global:MODULES = @{
     autoruns = "autoruns"
     typedurls = "typedurls"}
+
+# TODO ///////////////////////
+# make it even more modular with powershell mods
 
 function main() {
     changeWorkingDirectory
@@ -65,14 +67,14 @@ function printHelp() {
     Write-Host "
       ___           ___           ___           ___           ___     
      /\  \         /\  \         /\__\         /\__\         /\__\    
-    /::\  \       /::\  \       /::|  |       /:/  /        /::|  |   
-   /:/\:\  \     /:/\:\  \     /:|:|  |      /:/  /        /:|:|  |   
-  /::\~\:\  \   /::\~\:\  \   /:/|:|  |__   /:/  /  ___   /:/|:|__|__ 
- /:/\:\ \:\__\ /:/\:\ \:\__\ /:/ |:| /\__\ /:/__/  /\__\ /:/ |::::\__\
- \/_|::\/:/  / \:\~\:\ \/__/ \/__|:|/:/  / \:\  \ /:/  / \/__/~~/:/  /
-    |:|::/  /   \:\ \:\__\       |:/:/  /   \:\  /:/  /        /:/  / 
-    |:|\/__/     \:\ \/__/       |::/  /     \:\/:/  /        /:/  /  
-    |:|  |        \:\__\         /:/  /       \::/  /        /:/  /   
+    /  \  \       /  \  \       /  |  |       / /  /        /  |  |   
+   / /\ \  \     / /\ \  \     / | |  |      / /  /        / | |  |   
+  /  \ \ \  \   /  \ \ \  \   / /| |  |__   / /  /  ___   / /| |__|__ 
+ / /\ \ \ \__\ / /\ \ \ \__\ / / | | /\__\ / /__/  /\__\ / / |    \__\
+ \/_|  \/ /  / \ \ \ \ \/__/ \/__| |/ /  / \ \  \ / /  / \/__/--/ /  /
+    | |  /  /   \ \ \ \__\       | / /  /   \ \  / /  /        / /  / 
+    | |\/__/     \ \ \/__/       |  /  /     \ \/ /  /        / /  /  
+    | |  |        \ \__\         / /  /       \  /  /        / /  /   
      \|__|         \/__/         \/__/         \/__/         \/__/    
         
         " -ForegroundColor Yellow
@@ -113,23 +115,23 @@ function processArguments() {
 }
 
 function getIPConfig($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "ipconfig.exe /all"
+    $command = "ipconfig /all"
     executeRemotePsExec $remoteHost $command
     return $true
 }
 
 function getRoutingTable($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "netstat.exe -r"
+    $command = "netstat -r"
     executeRemotePsExec $remoteHost $command
 }
 
 function getDNSCache($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "ipconfig.exe /displaydns"
+    $command = "ipconfig /displaydns"
     executeRemotePsExec $remoteHost $command
 }
 
 function getNetstats($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "net statistics server"
+    $command = "net statistics server"
     executeRemotePsExec $remoteHost $command
 }
 
@@ -140,39 +142,40 @@ function getUsers($remoteHost) {
 
 function isUserSpecified() {
     if ($user -eq "" -or $user -eq $null) {
-        Write-Host "[!] Specify username with -user. Tip: you can run -users to get users who had engaged with this machine."
-        break
+        $user = Read-Host -Prompt "[!] Enter username of the destination machine (Tip: switch -users shows users who had engaged with the remote machine)"
+        Write-Host "[i] Tip: use -user <user> to avoid this prompt in the future..."
+        return $user
     }
 }
 
 function getRecentItems($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
     $command = "dir /TA /A:-D C:\Users\$user\AppData\Roaming\Microsoft\Windows\Recent"
     executeRemotePsExec $remoteHost $command
 }
 
 function getConnections($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "netstat.exe -anb"
+    $command = "netstat -anb"
     executeRemotePsExec $remoteHost $command
 }
 
 function getNetbiosCache($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "nbtstat.exe -A $remoteHost -c"
+    $command = "nbtstat -A $remoteHost -c"
     executeRemotePsExec $remoteHost $command
 }
 
 function getShell($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "cmd.exe"
+    $command = "cmd"
     executeRemotePsExec $remoteHost $command
 }
 
 function getProcessList($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "tasklist.exe"
+    $command = "tasklist"
     executeRemotePsExec $remoteHost $command
 }
 
 function getARPTable($remoteHost) {
-    $command = $Global:SYS_ROOT_PATH + "arp.exe -a"
+    $command = "arp -a"
     executeRemotePsExec $remoteHost $command
 }
 
@@ -182,13 +185,13 @@ function getPrefetches($remoteHost) {
 }
 
 function getDownloads($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
     $command = "dir C:\Users\$user\Downloads /TA"
     executeRemotePsExec $remoteHost $command
 }
 
 function getDesktop($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
     $command = "dir C:\Users\$user\Desktop /TA"
     executeRemotePsExec $remoteHost $command
 }
@@ -200,13 +203,13 @@ function getUSBEnum($remoteHost) {
     'HKEY_LOCAL_MACHINE\SYSTEM\ControlSet002\Enum\USBSTOR')
 
     $keys | ForEach-Object {
-        $command = 'C:\Windows\system32\reg.exe query ' + $_
+        $command = 'reg query ' + $_
         executeRemotePsExec $remoteHost $command
     }
 }
 
 function getMountedShares($remoteHost) {
-    $command = 'C:\Windows\system32\net use'
+    $command = 'net use'
     executeRemotePsExec $remoteHost $command
 }
 
@@ -215,19 +218,19 @@ function getMountedDevices($remoteHost) {
     'HKEY_LOCAL_MACHINE\SYSTEM\MountedDevices')
 
     $keys | ForEach-Object {
-        $command = 'C:\Windows\system32\reg.exe query ' + $_
+        $command = 'reg query ' + $_
         executeRemotePsExec $remoteHost $command
     }
 }
 
 function getAutoruns($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
     $arguments = $user
     executePSModule $Global:MODULES.autoruns $remoteHost $arguments
 }
 
 function getTypedURLs($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
     $arguments = $user
     executePSModule $Global:MODULES.typedurls $remoteHost $arguments
 }
@@ -250,7 +253,7 @@ function executePSModule($moduleName, $remoteHost, $arguments) {
 
     Copy-Item $moduleSourcePath -Destination $moduleDestinationFolder -Force -Recurse
     
-    $command = "powershell.exe " + "C:\" + "$destinationFolder\" + $module.fileName + " " + $arguments
+    $command = "powershell " + "C:\" + "$destinationFolder\" + $module.fileName + " " + $arguments
     executeRemotePsExec $remoteHost $command
     
     Remove-Item $moduleDestinationPath
@@ -262,7 +265,7 @@ function mountShare($remoteHost) {
 }
 
 function getMailFile($remoteHost) {
-    isUserSpecified
+    $user = isUserSpecified
 
     $Global:COMMAND_SPECIFIED = $true
     $mailfile = "$user.nsf"
@@ -285,7 +288,7 @@ function queryRegKey($remoteHost, $key) {
         Write-Host [!] Specify the key you want to query with -key
         break
     }
-    $command = 'C:\Windows\system32\reg.exe query "' + $key + '"'
+    $command = 'reg query "' + $key + '"'
     executeRemotePsExec $remoteHost $command
 }
 
