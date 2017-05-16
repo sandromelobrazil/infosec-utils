@@ -18,7 +18,7 @@ param(
     [switch]$mountedd,
     [switch]$mounteds,
     [switch]$drivers,
-    [switch]$prefech,
+    [switch]$prefetch,
     [switch]$recent,
     [switch]$downloads,
     [switch]$nbtstat,
@@ -325,7 +325,7 @@ function enumerateSystem($remoteHost) {
     if ($autoruns) {
         getAutoruns $remoteHost
     }
-    if ($prefech) {
+    if ($prefetch) {
         getPrefetches $remoteHost
     }
     if ($recent) {
