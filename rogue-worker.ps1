@@ -3,10 +3,8 @@ Param(
     # -hostname can be used when you want to check if we've had historical similarly named devices in whitelists or blacklists
     [string] $hostname 
 )
-
 $Global:MAX_ATTEMPTS = 7
 $Global:WHITELIST_BLACKLIST_PAYLOAD = ""
-
 
 function processArguments() {
     if ($forgiveness -ne "") {
@@ -17,11 +15,28 @@ function processArguments() {
     }
 }
 
+function setupPathsToDataSources() {
+    # $prompt = "Specify absolute path to a folder containing filteredResultSetWithEnrichedDataPrimoColumns* and all whitelist/blacklist files"
+    # $directoryLocation = Read-Host -Prompt $prompt
+    $directoryLocation = "C:\Users\$env:USERNAME\Desktop\Rogue"
+    
+    if ($directoryLocation -ne "" -and $directoryLocation -like "*C:\*") {
+        $Global:FILTERED_DEVICES = $directoryLocation + "\filteredResultSetWithEnrichedDataPrimoColumns_*.csv"
+        $Global:MAC_WHITELIST = $directoryLocation + "\mac_address_white_list.txt"
+        $Global:MAC_BLACKLIST = $directoryLocation + "\mac_address_black_list.txt"
+        $Global:MACHINE_NAME_WHITELIST = $directoryLocation + "\machine_name_white_list.txt"
+        $Global:MACHINE_NAME_BLACKLIST = $directoryLocation + "\machine_name_black_list.txt"
+    } else {
+        Write-Host $prompt
+        setupPathsToDataSources
+    }
+}
+
 function main() {
     setupPathsToDataSources
     processArguments
     [array] $filteredDevices = ConvertFrom-Csv (Get-Content $Global:FILTERED_DEVICES)
-    
+
     # if the -hostname is not provided, the script will process the filtered devices .csv file.
     if ($hostname -eq "") {
         Write-Host "[*] Reading filtered devices list..."
@@ -52,7 +67,7 @@ function processFilteredDevices($filteredDevices) {
     } else {
         Write-Host "[*] No filtered devices found..."
     }
-
+    
     return $isSimilarDeviceFound
 }
 
@@ -119,7 +134,8 @@ function findSimilarDevices($filteredDevice, $knownDevicesFile) {
     Get-Content $knownDevicesFile | ForEach-Object {
         $knownDevice = $_
 
-        while ($attempt -le $Global:MAX_ATTEMPTS) {
+        # $filteredDeviceName.Length -gt $attempt + 4 <- this is so that similarly named device contains at least 4 similar characters, otherwise it's considered that no similar device is found.
+        while ($attempt -lt $Global:MAX_ATTEMPTS -and $filteredDeviceName.Length -gt $attempt + 4) {
             $attemptName = $filteredDeviceName.Substring(0, $filteredDeviceName.Length - $attempt)
             $isSimilar = $knownDevice -like "*"+$attemptName+"*"
             
@@ -134,6 +150,8 @@ function findSimilarDevices($filteredDevice, $knownDevicesFile) {
         }
         $attempt = 0
     }
+    
+    return $isSimilarDeviceFound
 }
 
 main
