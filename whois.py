@@ -9,6 +9,8 @@ from urllib.error import HTTPError
 BASE_WHOIS_URL = "https://www.whois.com/whois/"
 BASE_CYMON_URL = "https://cymon.io/api/nexus/v1/ip/"
 
+# todo senderbase IP reputation
+
 def sendHTTPRequest(request):
     try:
         response = urllib.request.urlopen(request).read().decode("utf-8")
@@ -21,7 +23,8 @@ def sendHTTPRequest(request):
         exit(1)
     return response
 
-def buildHTTPRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "Accept": "application/json"}, data=None):
+
+def buildHTTPRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "Accept": "application/json", "Content-Type": "text/html; charset=utf-8"}, data=None):
     httpRequest = urllib.request.Request(url, data=data, headers=headers)
     return httpRequest
 
@@ -101,28 +104,17 @@ def getWhoisRawByDomain(domain):
 
 
 def printRegistrantInfo(registrantInfo, domain):
-    print("Registered:\t" + registrantInfo["created"] + " | " + registrantInfo["organisation"] + "\n"
-        "Location:\t" + registrantInfo["country"] + ", " + registrantInfo["state"] + ", " + registrantInfo["city"] + "\n"
-        "More:\t\t" + BASE_WHOIS_URL + domain)
+    registrantInfo = registrantInfo.split('<pre class="df-raw"')
+    
+    if len(registrantInfo) > 1:
+        registrantInfo = registrantInfo[1].split('</pre>')[0]
+        lines = registrantInfo.split("\n")
+        registrantInfo = ""
+        
+        for line in lines[1:]:
+            registrantInfo += line + "\n"
 
-
-def getRegistrantInfo(whoisRawData):
-    registrantAttributes = \
-        "Creation Date: ", \
-        "Registrant Organization: ", \
-        "Registrant City: ", \
-        "Registrant State/Province: ", \
-        "Registrant Country: "
-
-    registrantInfoKeys = ["created", "organisation", "city", "state", "country"]
-    registrantInfoValues = []
-
-    for index, attribute in enumerate(registrantAttributes):
-        registrantInfoValues.append(getRegistrantDataByAttribute(whoisRawData, attribute))
-
-    registrantInfoValues = replaceEmptyItemsWithPlaceholders(registrantInfoValues)
-    registrantInfo = dict(zip(registrantInfoKeys, registrantInfoValues))
-    return registrantInfo
+        print("\n[*] Whois information: \n" + registrantInfo)
 
 
 def replaceEmptyItemsWithPlaceholders(registrantInfoValues):
@@ -130,12 +122,6 @@ def replaceEmptyItemsWithPlaceholders(registrantInfoValues):
         if info is None:
             registrantInfoValues[index] = "-"
     return registrantInfoValues
-
-
-def getRegistrantDataByAttribute(whoisRawData, attribute):
-    if whoisRawData.find(attribute) > 0 :
-        value = whoisRawData.split(attribute)[1].split("\n")[0]
-        return str(value).strip()
 
 
 def getThreatReportsByIP(ip):
@@ -148,7 +134,7 @@ def getThreatReportsByIP(ip):
 
 def printThreatReports(threatReports):
     if threatReports["count"] > 0:
-        print("\n[*] Some historical threat reports for: " + DOMAIN_IP)
+        print("\n[*] Some historical threat reports for " + DOMAIN_IP + ":")
 
         for report in threatReports["results"]:
             print("[!] " + report["created"] + " " + report["title"] + " " + str(report["description"]).replace(".","[.]").strip())
@@ -158,7 +144,7 @@ def printThreatReports(threatReports):
                 print("More: " + report["details_url"])
             print("\r")
     else:
-        print("\n[*] No threat reports found for " + DOMAIN_IP)
+        print("\n[*] No associated threat reports found")
 
 
 def isValidIPAddress(string):
@@ -189,13 +175,13 @@ def extractCanonicalName(string):
         hostname = string.split(anchor)[1]
         hostname = hostname.split("<br/>")[0]
     else:
-        hostname = "[*] Could not resolve to hostname..."
+        hostname = "\n[*] Could not resolve to hostname..."
 
     return hostname
 
 
 def printHostName(hostname):
-    print("[*] Resolving to hostname...\n" + hostname)
+    print("[*] Resolved IP to hostname " + hostname)
 
 
 def main():
@@ -207,9 +193,6 @@ def main():
 
         if not isValidIPAddress(domain):
             fetchAllDNSRecordsByDomain(domain)
-            whoisDomainRaw = getWhoisRawByDomain(domain)
-            registrantInfo = getRegistrantInfo(whoisDomainRaw)
-            printRegistrantInfo(registrantInfo, domain)
         else:
             DOMAIN_IP = domain
             hostname = getHostNameByIp(DOMAIN_IP)
@@ -217,7 +200,8 @@ def main():
             domainsRaw = getDomainsByIP(DOMAIN_IP)
             printDomains(domainsRaw)
 
-
+        whoisDomainRaw = getWhoisRawByDomain(domain)
+        printRegistrantInfo(whoisDomainRaw, domain)
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
     else:
