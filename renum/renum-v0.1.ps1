@@ -254,7 +254,7 @@ function executePSModule($moduleName, $remoteHost, $arguments) {
     Copy-Item $moduleSourcePath -Destination $moduleDestinationFolder -Force -Recurse
     $command = "powershell " + "C:\" + "$destinationFolder\" + $module.fileName + " " + $arguments
 
-    executeRemotePsExec $remoteHost $command   
+    executeRemotePsExec $remoteHost $command
     Remove-Item $moduleDestinationPath
 }
 
