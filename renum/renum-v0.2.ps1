@@ -59,7 +59,9 @@ function main() {
 }
 
 function closeRemoteSession() {
-    Remove-PSSession $Global:SESSION
+    if (!$mailfile) {
+        Remove-PSSession $Global:SESSION
+    }
     cmdkey.exe /delete:$remoteHost | Out-Null
 }
 
@@ -414,9 +416,13 @@ function copyUtilsToRemoteHost($remoteHost) {
 
 function establishRemoteSession($remoteHost) {
     Write-Host "[*] Connecting to" $remoteHost
-    $Global:SESSION = New-PSSession -ComputerName $remoteHost -Credential $Global:CREDENTIALS
-    Write-Host "[*] Connected!"
     cmdkey.exe /add:$remoteHost /user:$Global:SERVICE_ID /pass:$Global:PASSWORD | Out-Null
+
+    if (!$mailfile) {
+        $Global:SESSION = New-PSSession -ComputerName $remoteHost -Credential $Global:CREDENTIALS
+    }
+    Write-Host "[*] Connected!"
+
 }
 
 main
