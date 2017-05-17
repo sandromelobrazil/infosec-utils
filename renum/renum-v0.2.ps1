@@ -84,7 +84,7 @@ function printHelp() {
         Write-Host "[*] REnum (RemoteEnumeration) is a collection of convenience functions to help during an investigtion." -ForegroundColor Cyan
         Write-Host [i] Specify remote host and -[command] you want to execute.`n[i] Example: renum-v0.1.ps1 127.0.0.1 -ipcfg to get remote machine IP configuration.`n
         Write-Host "[i] Available commands:`n
-        Tip:`t`t Omit the command to open C$ share without mounting it.. or use -mount to do it
+        Tip:`t`t Omit the command to open C$ share without mounting it... or use -mount to do it
         -shell`t`t Get remote shell
         -arp`t`t Get ARP table
         -ipcfg`t`t Get IP configuration
@@ -99,15 +99,15 @@ function printHelp() {
         -module`t`t Specify path of an external module to be executed. -modargs to supply arguments
         -usbenum`t Get USB devices that had been plugged in
         -drivers`t Get installed drivers
-        -nbtcache`t Get NetBios cached names
+        -nbtcache`t Get NetBios cached
         -typedurls`t Get URLs user typed in IE
-        -mailfile`t Open user (-user <username>) domino mailfile.
+        -mailfile`t Open user (-user <username>) domino mailfile
         -netstats`t Get uptime, permissions and password violations count
         -downloads`t Get contents of downloads folder (-user <username>)
         -desktop`t Get contents of desktop (-user <username>)
         -prefetch`t Get prefetches
         -recent`t`t Get recently accessed documents (-user <username>)
-        -dnscache`t Get DNS cache entries`n"
+        -dnscache`t Get DNS cache`n"
         break
 }
 
