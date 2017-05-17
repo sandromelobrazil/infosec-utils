@@ -1,7 +1,6 @@
 param(
     [string]$remoteHost,
     [string]$user,
-    [string]$password,
     [switch]$shell,
     [switch]$arp,
     [switch]$ipcfg,
@@ -32,17 +31,16 @@ param(
     [switch]$h
 )
 
+# If these not set, you will be prompted for your service id credentials. Setting these is not encouraged.
+$Global:SERVICE_ID = ""
+$Global:PASSWORD = ''
+
 $Global:SESSION = ""
-$Global:SERVICE_ID = "x"
-$Global:PASSWORD = 'x'
 $Global:COMMAND_SPECIFIED = $false
 $Global:MODS_PATH = ".\mods\"
 $Global:UTILS_PATH = ".\utils\"
-$Global:PASSWORD2 = ConvertTo-SecureString $Global:PASSWORD -AsPlainText -Force
-$Global:CREDENTIALS = New-Object System.Management.Automation.PSCredential($Global:SERVICE_ID, $Global:PASSWORD2)
 
-# TODO
-# order help menu
+# todo: order help menu
 
 function main() {
     changeWorkingDirectory
@@ -114,6 +112,17 @@ function printHelp() {
 function processArguments() {
     if ($remoteHost -eq "") {
         printHelp
+    }
+    
+    processCredentials
+}
+
+function processCredentials() {
+    if ($Global:PASSWORD -eq '' -or $Global:SERVICE_ID -eq '') {
+        $Global:CREDENTIALS = Get-Credential
+    } else {
+        $Global:PASSWORD2 = ConvertTo-SecureString $Global:PASSWORD -AsPlainText -Force
+        $Global:CREDENTIALS = New-Object System.Management.Automation.PSCredential($Global:SERVICE_ID, $Global:PASSWORD2)
     }
 }
 
