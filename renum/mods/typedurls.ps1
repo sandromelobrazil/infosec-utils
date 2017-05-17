@@ -9,5 +9,5 @@ $SID = ((New-Object System.Security.Principal.NTAccount($user)).Translate([Syste
     )
 
 foreach ($path in $PATHS) {
-    $rest = Get-Item $path
+    Get-Item $path
 }
