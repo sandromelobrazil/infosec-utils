@@ -175,13 +175,16 @@ def extractCanonicalName(string):
         hostname = string.split(anchor)[1]
         hostname = hostname.split("<br/>")[0]
     else:
-        hostname = "\n[*] Could not resolve to hostname..."
+        hostname = None
 
     return hostname
 
 
 def printHostName(hostname):
-    print("[*] Resolved IP to hostname " + hostname)
+    if hostname != None:
+        print("[*] Resolved IP to hostname " + hostname)
+    else:
+        print("\n[*] Could not resolve IP to hostname...")
 
 
 def main():
