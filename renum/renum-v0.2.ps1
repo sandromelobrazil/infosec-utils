@@ -92,11 +92,11 @@ function printHelp() {
         -procs`t`t Get running processes
         -conns`t`t Get established connections & ports listening
         -users`t`t Get users who have used the machine
-        -regquery`t Get registry key info. Use -key to specify the 'key' - note the surrounding quotes
+        -regquery`t Get registry key info. Use -key to specify the 'key'. Mind the quotes.
         -autoruns`t Get autoruns from popular persistence locations
         -mountedd`t Get currently mounted physical device letters
         -mounteds`t Get currently mounted shares
-        -module`t Execute external module with -module <path-to-module>. Use -modargs to supply arguments if required.
+        -module`t`t Specify path of an external module to be executed. -modargs to supply arguments
         -usbenum`t Get USB devices that had been plugged in
         -drivers`t Get installed drivers
         -nbtcache`t Get NetBios cached names
