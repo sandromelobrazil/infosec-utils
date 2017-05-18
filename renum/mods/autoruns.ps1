@@ -5,18 +5,17 @@ param(
 $SID = ((New-Object System.Security.Principal.NTAccount($user)).Translate([System.Security.Principal.SecurityIdentifier])).value
 
 [array] $PATHS = (
-    "REGISTRY::HKEY_USERS\$SID\",
-    "REGISTRY::HKEY_USERS\$SID\Software\Microsoft\Windows\CurrentVersion\Run",
-    "REGISTRY::HKEY_USERS\$SID\Software\Microsoft\Windows\CurrentVersion\RunOnce",
-    "REGISTRY::HKLM\Software\Microsoft\Windows\CurrentVersion\Run",
-    "REGISTRY::HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce",
-    "REGISTRY::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\Notify"
+    "HKEY_USERS\$SID\Software\Microsoft\Windows\CurrentVersion\Run\",
+    "HKEY_USERS\$SID\Software\Microsoft\Windows\CurrentVersion\RunOnce\",
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\Run\",
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce\"
+    # "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\Notify"
     # "REGISTRY::HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\\Shell",
     # "REGISTRY::HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\\AppInit_DLLs"
     )
 
 foreach ($path in $PATHS) {
-    Get-Item $path
+    reg query $path
     Write-Host
 }
 
