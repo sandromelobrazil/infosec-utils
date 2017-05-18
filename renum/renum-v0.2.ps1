@@ -100,7 +100,7 @@ function printHelp() {
         -usbenum`t Get USB devices that had been plugged in
         -drivers`t Get installed drivers
         -nbtcache`t Get NetBios cached
-        -typedurls`t Get URLs user typed in IE
+        -typedurls`t Get URLs user (-user <<username>) typed in Internet Explorer address bar
         -mailfile`t Open user (-user <username>) domino mailfile
         -netstats`t Get uptime, permissions and password violations count
         -downloads`t Get contents of downloads folder (-user <username>)
@@ -252,7 +252,7 @@ function getMailFile($remoteHost) {
     $mailfileDestination = "C:\Users\$env:USERNAME\Downloads\$mailfile"
     $mailfileSource = "\\" + "$remoteHost\d$\Lotus\Domino\data\mail\$mailfile"
     
-    Write-Host [*] Saving mailfile to $mailfileDestination...
+    Write-Host [*] Downloading mailfile to $mailfileDestination, please wait, it will be opened automatically...
     Copy-Item $mailfileSource -Destination $mailfileDestination -Force -Recurse
     Write-Host [*] Opening mailfile... Do not forget to delete it once done.
     Invoke-Item $mailfileDestination
