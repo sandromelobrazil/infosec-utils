@@ -193,10 +193,12 @@ function getMFT($remoteHost) {
 }
 
 function parseMFT($remoteHost) {
-    Write-Host "[*] Parsing $remoteHost.mft..."
     $mftLocation = "C:\artefacts\$remoteHost.mft"
     $mftReport = "C:\artefacts\$remoteHost-mft.xls"
+    
+    Write-Host "[*] Parsing $remoteHost.mft..."
     .\utils\mftdump.exe $mftLocation /o $mftReport
+    
     Write-Host "[*] Opening $remoteHost MFT, please wait..."
     Invoke-Item $mftReport
 }
