@@ -26,7 +26,9 @@ param(
     [switch]$netstats,
     [switch]$dnscache,
     [switch]$programs,
+    [switch]$mft,
     [switch]$mailfile,
+    [switch]$sniffer,
     [string]$module,
     [string]$modargs,
     [switch]$h
@@ -63,7 +65,7 @@ function main() {
 
 function closeRemoteSession() {
     if (!$mailfile) {
-        Remove-PSSession $Global:SESSION
+        Get-PSSession | Remove-PSSession
     }
     cmdkey.exe /delete:$remoteHost | Out-Null
 }
@@ -89,7 +91,7 @@ function printHelp() {
         Write-Host "[i] Available commands:`n
         Tip:`t`t Omit the command to open C$ share without mounting it... or use -mount to do it
         -shell`t`t Get remote shell
-        -arp`t`t Get ARP table
+        -arp`t`t Get ARP cache
         -ipcfg`t`t Get IP configuration
         -route`t`t Get routing tables
         -procs`t`t Get running processes
@@ -99,18 +101,20 @@ function printHelp() {
         -autoruns`t Get autoruns from popular persistence locations
         -mountedd`t Get currently mounted physical device letters
         -mounteds`t Get currently mounted shares
-        -programs`t Get currently installed software
+        -programs`t Get currently installed programs
         -module`t`t Specify path of an external module to be executed. -modargs to supply arguments
         -usbenum`t Get USB devices that had been plugged in
         -drivers`t Get installed drivers
-        -nbtcache`t Get NetBios cached
-        -typedurls`t Get URLs user (-user <<username>) typed in Internet Explorer address bar
-        -mailfile`t Open user (-user <username>) domino mailfile
+        -sniffer`t Sniff traffic
+        -nbtcache`t Get NetBios cache
+        -typedurls`t Get URLs  typed in Internet Explorer address bar. Requires -user <username>
+        -mailfile`t Open domino mailfile. Requires -user <username>
         -netstats`t Get uptime, permissions and password violations count
-        -downloads`t Get contents of downloads folder (-user <username>)
-        -desktop`t Get contents of desktop (-user <username>)
+        -downloads`t Get contents of the downloads folder. Requires -user <username>
+        -desktop`t Get contents desktop contents. Requires -user <username>
         -prefetch`t Get prefetches
-        -recent`t`t Get recently accessed documents (-user <username>)
+        -mft`t`t Get Master File Table
+        -recent`t`t Get recently accessed documents. Requires -user <username>
         -dnscache`t Get DNS cache`n"
         break
 }
@@ -172,6 +176,29 @@ function getRecentItems($remoteHost) {
     $user = isUserSpecified
     $command = "recent"
     executeRemoteCommand $remoteHost $command $user
+}
+
+function sniffTraffic($remoteHost) {
+    $command = "sniffer"
+    $ignoreIP = (Test-Connection -ComputerName (hostname) -Count 1  | Select IPV4Address).IPV4Address.IPAddressToString
+    executeRemoteCommand $remoteHost $command $ignoreIP
+}
+
+function getMFT($remoteHost) {
+    $command = "mft"
+    copyUtilsToRemoteHost $remoteHost
+    executeRemoteCommand $remoteHost $command
+    downloadArtefact $remoteHost "$remoteHost.mft"
+    parseMFT $remoteHost
+}
+
+function parseMFT($remoteHost) {
+    Write-Host "[*] Parsing $remoteHost.mft..."
+    $mftLocation = "C:\artefacts\$remoteHost.mft"
+    $mftReport = "C:\artefacts\$remoteHost-mft.xls"
+    .\utils\mftdump.exe $mftLocation /o $mftReport
+    Write-Host "[*] Opening $remoteHost MFT, please wait..."
+    Invoke-Item $mftReport
 }
 
 function getConnections($remoteHost) {
@@ -296,6 +323,9 @@ function enumerateSystem($remoteHost) {
     if ($dnscache) {
         getDNSCache $remoteHost
     }
+    if ($mft) {
+        getMFT $remoteHost
+    }
     if ($users) {
         getUsers $remoteHost
     }
@@ -316,6 +346,9 @@ function enumerateSystem($remoteHost) {
     }
     if ($recent) {
         getRecentItems $remoteHost
+    }
+    if ($sniffer) {
+        sniffTraffic $remoteHost
     }
     if ($nbtcache) {
         getNetbiosCache $remoteHost
@@ -408,22 +441,15 @@ function getFileName($artefact) {
     return Split-Path $artefact -Leaf
 }
 
-function downloadArtefact($remoteHost, $artefactName, $isLocked) {
-    # downloads artefacts from a remote machine host being investigated;
-    $artefactsSaveLocation = "C:\artefacts\$remoteHost\"
-
-    if ($isLocked) {
-        $artefactSourceLocation = "\\$remoteHost\c$\TEMP\$artefactName"
-    } else {
-        $artefactLocation = Split-Path $artefactName -NoQualifier
-        $artefactSourceLocation = "\\$remoteHost\c$" + $artefactLocation
-    }
-
+function downloadArtefact($remoteHost, $artefactName, $isLocked=$false) {
+    $artefactsSaveLocation = "C:\artefacts\" + $artefactName
+    $artefactSourceLocation = "\\" + $remoteHost + "\c$\temp\$artefactName"
+    Write-Host "[*] Downloading $artefactName to $artefactsSaveLocation"
     Copy-Item $artefactSourceLocation -Destination $artefactsSaveLocation -Force -Recurse
 }
 
 function copyUtilsToRemoteHost($remoteHost) {
-    Copy-Item ".\utils\copy.exe" -Destination \\$remoteHost\c$\TEMP\copy.exe -Force -Recurse
+    Copy-Item .\utils\copy.exe -Destination \\$remoteHost\c$\TEMP\copy.exe -Recurse -Force
 }
 
 function establishRemoteSession($remoteHost) {
@@ -434,7 +460,6 @@ function establishRemoteSession($remoteHost) {
         $Global:SESSION = New-PSSession -ComputerName $remoteHost -Credential $Global:CREDENTIALS
     }
     Write-Host "[*] Connected!"
-
 }
 
 main
