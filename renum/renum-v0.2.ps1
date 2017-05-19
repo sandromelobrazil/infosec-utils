@@ -25,6 +25,7 @@ param(
     [switch]$artefacts,
     [switch]$netstats,
     [switch]$dnscache,
+    [switch]$programs,
     [switch]$mailfile,
     [string]$module,
     [string]$modargs,
@@ -45,11 +46,13 @@ $Global:UTILS_PATH = ".\utils\"
 function main() {
     changeWorkingDirectory
     processArguments
-    establishRemoteSession $remoteHost
 
     if ($h) {
         printHelp
     } 
+    
+    establishRemoteSession $remoteHost
+    
     if ($shell) {
         getShell $remoteHost
     } 
@@ -96,6 +99,7 @@ function printHelp() {
         -autoruns`t Get autoruns from popular persistence locations
         -mountedd`t Get currently mounted physical device letters
         -mounteds`t Get currently mounted shares
+        -programs`t Get currently installed software
         -module`t`t Specify path of an external module to be executed. -modargs to supply arguments
         -usbenum`t Get USB devices that had been plugged in
         -drivers`t Get installed drivers
@@ -222,6 +226,11 @@ function getMountedShares($remoteHost) {
     executeRemoteCommand $remoteHost $command
 }
 
+function getInstalledPrograms($remoteHost) {
+    $command = 'programs'
+    executeRemoteCommand $remoteHost $command
+}
+
 function getMountedDevices($remoteHost) {
     $command = "mounteddevices"
     executeRemoteCommand $remoteHost $command
@@ -252,7 +261,7 @@ function getMailFile($remoteHost) {
     $mailfileDestination = "C:\Users\$env:USERNAME\Downloads\$mailfile"
     $mailfileSource = "\\" + "$remoteHost\d$\Lotus\Domino\data\mail\$mailfile"
     
-    Write-Host [*] Downloading mailfile to $mailfileDestination, please wait, it will be opened automatically...
+    Write-Host "[*] Downloading mailfile to $mailfileDestination. Please wait, it will be opened automatically..."
     Copy-Item $mailfileSource -Destination $mailfileDestination -Force -Recurse
     Write-Host [*] Opening mailfile... Do not forget to delete it once done.
     Invoke-Item $mailfileDestination
@@ -334,6 +343,9 @@ function enumerateSystem($remoteHost) {
     }
     if ($drivers) {
         getDrivers $remoteHost
+    }
+    if ($programs) {
+        getInstalledPrograms $remoteHost
     }
     if ($typedurls) {
         getTypedURLs $remoteHost
