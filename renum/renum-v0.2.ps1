@@ -413,36 +413,6 @@ function executeRemoteCommand($remoteHost, $module, $arguments=$null, $isExterna
     Invoke-Command -Session $Global:SESSION -FilePath $module -ArgumentList $arguments
 }
 
-function collectArtefacts($remoteHost, $user) {
-    $Global:COMMAND_SPECIFIED = $true
-    $lockedArtefacts = @("C:\Users\$user\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat")
-    
-    $unlockedArtefacts = @(
-        "C:\ProgramData\McAfee\DesktopProtection", 
-        "C:\Quarantine"
-        # "C:\Users\$user\AppData\Local\Mozilla\Firefox\Profiles",
-        # "C:\Users\$user\AppData\Local\Google\Chrome\User Data\Default\Cache"
-    )
-
-    # $lockedArtefacts | ForEach-Object {
-    #     $artefactName = getFileName $_
-    #     psexec.exe \\$remoteHost -u $Global:SERVICE_ID -p $Global:PASSWORD cmd /c C:\TEMP\copy.exe /FileNamePath:$_ /OutputPath:C:\TEMP
-    #     downloadArtefact $remoteHost $artefactName $true
-    # }
-
-    $unlockedArtefacts | ForEach-Object {
-        Write-Host "[*] Collecting $_..."
-        downloadArtefact $remoteHost $_ $false
-    }
-
-    Write-Host "[*] Changing working directory.."
-    cd C:\artefacts\$remoteHost
-}
-
-function getFileName($artefact) {
-    return Split-Path $artefact -Leaf
-}
-
 function downloadArtefact($remoteHost, $artefactName, $isLocked=$false) {
     $artefactsSaveLocation = "C:\artefacts\" + $artefactName
     $artefactSourceLocation = "\\" + $remoteHost + "\c$\temp\$artefactName"
