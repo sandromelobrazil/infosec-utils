@@ -8,6 +8,7 @@ param(
     [switch]$conns,
     [switch]$procs,
     [switch]$users,
+    [switch]$accounts,
     [switch]$usbenum,
     [switch]$regquery,
     [string]$key,
@@ -24,6 +25,7 @@ param(
     [switch]$typedurls,
     [switch]$artefacts,
     [switch]$netstats,
+    [switch]$sessions,
     [switch]$dnscache,
     [switch]$programs,
     [switch]$mft,
@@ -40,6 +42,7 @@ param(
 # fix arguments being passed into the external module
 # check sheduled tasks in persistence module
 # todo: order help menu
+# net user
 
 # If these not set, you will be prompted for your service id credentials. Setting these is not encouraged.
 $Global:SERVICE_ID = ""
@@ -111,6 +114,8 @@ function printHelp() {
         -drivers`t Get installed drivers
         -sniffer`t Sniff traffic
         -nbtcache`t Get NetBios cache
+        -accounts`t Get user accounts for machine
+        -sessions`t Get a list of SMB sessions incoming to the remote machine
         -typedurls`t Get URLs  typed in Internet Explorer address bar. Requires -user <username>
         -mailfile`t Open domino mailfile. Requires -user <username>
         -netstats`t Get uptime, permissions and password violations count
@@ -174,6 +179,16 @@ function getNetstats($Global:REMOTE_HOST) {
 
 function getUsers($Global:REMOTE_HOST) {
     $command = "users"
+    executeRemoteCommand $Global:REMOTE_HOST $command
+}
+
+function getAccounts($Global:REMOTE_HOST) {
+    $command = "accounts"
+    executeRemoteCommand $Global:REMOTE_HOST $command
+}
+
+function getSMBSessions($Global:REMOTE_HOST) {
+    $command = "smbsessions"
     executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
@@ -355,8 +370,14 @@ function enumerateSystem($Global:REMOTE_HOST) {
     if ($typedurl) {
         getTypedURLs $Global:REMOTE_HOST
     }
+    if ($accounts) {
+        getAccounts $Global:REMOTE_HOST
+    }
     if ($autoruns) {
         getAutoruns $Global:REMOTE_HOST
+    }
+    if ($sessions) {
+        getSMBSessions $Global:REMOTE_HOST
     }
     if ($prefetch) {
         getPrefetches $Global:REMOTE_HOST
