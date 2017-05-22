@@ -1,5 +1,5 @@
 param(
-    [string]$remoteHost,
+    [string]$Global:REMOTE_HOST,
     [string]$user,
     [switch]$shell,
     [switch]$arp,
@@ -34,32 +34,36 @@ param(
     [switch]$h
 )
 
+# todo accept IP as a remote host
+# make sniffer save output to the File
+# make snifffer save to PCAP
+# fix arguments being passed into the external module
+# check sheduled tasks in persistence module
+# todo: order help menu
+
 # If these not set, you will be prompted for your service id credentials. Setting these is not encouraged.
 $Global:SERVICE_ID = ""
 $Global:PASSWORD = ''
-
 $Global:SESSION = ""
 $Global:COMMAND_SPECIFIED = $false
 $Global:MODS_PATH = ".\mods\"
 $Global:UTILS_PATH = ".\utils\"
 
-# todo: order help menu
-
 function main() {
     changeWorkingDirectory
     processArguments
-
+        
     if ($h) {
         printHelp
     } 
     
-    establishRemoteSession $remoteHost
+    establishRemoteSession $Global:REMOTE_HOST
     
     if ($shell) {
-        getShell $remoteHost
+        getShell $Global:REMOTE_HOST
     } 
 
-    enumerateSystem $remoteHost   
+    enumerateSystem $Global:REMOTE_HOST   
     closeRemoteSession
 }
 
@@ -67,7 +71,7 @@ function closeRemoteSession() {
     if (!$mailfile) {
         Get-PSSession | Remove-PSSession
     }
-    cmdkey.exe /delete:$remoteHost | Out-Null
+    cmdkey.exe /delete:$Global:REMOTE_HOST | Out-Null
 }
 
 function printHelp() {
@@ -120,11 +124,22 @@ function printHelp() {
 }
 
 function processArguments() {
-    if ($remoteHost -eq "") {
+    if ($Global:REMOTE_HOST -eq "") {
         printHelp
     }
-    
+    processHost  
     processCredentials
+}
+
+function processHost() {
+    try {
+        if ([ipaddress] $Global:REMOTE_HOST) {
+            $Global:REMOTE_HOST = [System.Net.Dns]::GetHostByAddress($Global:REMOTE_HOST).HostName
+        }
+    }
+    catch {
+        
+    }
 }
 
 function processCredentials() {
@@ -136,30 +151,30 @@ function processCredentials() {
     }
 }
 
-function getIPConfig($remoteHost) {
+function getIPConfig($Global:REMOTE_HOST) {
     $command = "ipcfg"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
     return $true
 }
 
-function getRoutingTable($remoteHost) {
+function getRoutingTable($Global:REMOTE_HOST) {
     $command = "routing"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getDNSCache($remoteHost) {
+function getDNSCache($Global:REMOTE_HOST) {
     $command = "dnscache"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getNetstats($remoteHost) {
+function getNetstats($Global:REMOTE_HOST) {
     $command = "netstats"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getUsers($remoteHost) {
+function getUsers($Global:REMOTE_HOST) {
     $command = "users"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
 function isUserSpecified() {
@@ -172,123 +187,123 @@ function isUserSpecified() {
     }
 }
 
-function getRecentItems($remoteHost) {
+function getRecentItems($Global:REMOTE_HOST) {
     $user = isUserSpecified
     $command = "recent"
-    executeRemoteCommand $remoteHost $command $user
+    executeRemoteCommand $Global:REMOTE_HOST $command $user
 }
 
-function sniffTraffic($remoteHost) {
+function sniffTraffic($Global:REMOTE_HOST) {
     $command = "sniffer"
     $ignoreIP = (Test-Connection -ComputerName (hostname) -Count 1  | Select IPV4Address).IPV4Address.IPAddressToString
-    executeRemoteCommand $remoteHost $command $ignoreIP
+    executeRemoteCommand $Global:REMOTE_HOST $command $ignoreIP
 }
 
-function getMFT($remoteHost) {
+function getMFT($Global:REMOTE_HOST) {
     $command = "mft"
-    copyUtilsToRemoteHost $remoteHost
-    executeRemoteCommand $remoteHost $command
-    downloadArtefact $remoteHost "$remoteHost.mft"
-    parseMFT $remoteHost
+    copyUtilsToRemoteHost $Global:REMOTE_HOST
+    executeRemoteCommand $Global:REMOTE_HOST $command
+    downloadArtefact $Global:REMOTE_HOST "$Global:REMOTE_HOST.mft"
+    parseMFT $Global:REMOTE_HOST
 }
 
-function parseMFT($remoteHost) {
-    $mftLocation = "C:\artefacts\$remoteHost.mft"
-    $mftReport = "C:\artefacts\$remoteHost-mft.xls"
+function parseMFT($Global:REMOTE_HOST) {
+    $mftLocation = "C:\artefacts\$Global:REMOTE_HOST.mft"
+    $mftReport = "C:\artefacts\$Global:REMOTE_HOST-mft.xls"
     
-    Write-Host "[*] Parsing $remoteHost.mft..."
+    Write-Host "[*] Parsing $Global:REMOTE_HOST.mft..."
     .\utils\mftdump.exe $mftLocation /o $mftReport
     
-    Write-Host "[*] Opening $remoteHost MFT, please wait..."
+    Write-Host "[*] Opening $Global:REMOTE_HOST MFT, please wait..."
     Invoke-Item $mftReport
 }
 
-function getConnections($remoteHost) {
+function getConnections($Global:REMOTE_HOST) {
     $command = "connections"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getNetbiosCache($remoteHost) {
+function getNetbiosCache($Global:REMOTE_HOST) {
     $command = "netbioscache"
-    executeRemoteCommand $remoteHost $command $remoteHost
+    executeRemoteCommand $Global:REMOTE_HOST $command $Global:REMOTE_HOST
 }
 
-function getShell($remoteHost) {
+function getShell($Global:REMOTE_HOST) {
     $Global:COMMAND_SPECIFIED = $true
-    Enter-PSSession -ComputerName $remoteHost -Credential $Global:CREDENTIALS
+    Enter-PSSession -ComputerName $Global:REMOTE_HOST -Credential $Global:CREDENTIALS
 }
 
-function getProcessList($remoteHost) {
+function getProcessList($Global:REMOTE_HOST) {
     $command = "tasklist"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getARPTable($remoteHost) {
+function getARPTable($Global:REMOTE_HOST) {
     $command = "arp"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getPrefetches($remoteHost) {
+function getPrefetches($Global:REMOTE_HOST) {
     $command = "prefetches"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getDownloads($remoteHost) {
+function getDownloads($Global:REMOTE_HOST) {
     $user = isUserSpecified
     $command = "downloads"
-    executeRemoteCommand $remoteHost $command $user
+    executeRemoteCommand $Global:REMOTE_HOST $command $user
 }
 
-function getDesktop($remoteHost) {
+function getDesktop($Global:REMOTE_HOST) {
     $user = isUserSpecified
     $command = "desktop"
-    executeRemoteCommand $remoteHost $command $user
+    executeRemoteCommand $Global:REMOTE_HOST $command $user
 }
 
-function getUSBEnum($remoteHost) {
+function getUSBEnum($Global:REMOTE_HOST) {
     $command = "usbenumeration"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getMountedShares($remoteHost) {
+function getMountedShares($Global:REMOTE_HOST) {
     $command = 'mountedshares'
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getInstalledPrograms($remoteHost) {
+function getInstalledPrograms($Global:REMOTE_HOST) {
     $command = 'programs'
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getMountedDevices($remoteHost) {
+function getMountedDevices($Global:REMOTE_HOST) {
     $command = "mounteddevices"
-    executeRemoteCommand $remoteHost $command
+    executeRemoteCommand $Global:REMOTE_HOST $command
 }
 
-function getAutoruns($remoteHost) {
+function getAutoruns($Global:REMOTE_HOST) {
     $user = isUserSpecified
     $command = "autoruns"
-    executeRemoteCommand $remoteHost $command $user
+    executeRemoteCommand $Global:REMOTE_HOST $command $user
 }
 
-function getTypedURLs($remoteHost) {
+function getTypedURLs($Global:REMOTE_HOST) {
     $user = isUserSpecified
     $command = "typedurls"
-    executeRemoteCommand $remoteHost $command $user
+    executeRemoteCommand $Global:REMOTE_HOST $command $user
 }
 
-function mountShare($remoteHost) {
-    net use * \\$remoteHost\c$ /user:$Global:SERVICE_ID $Global:PASSWORD
-    Invoke-Item \\$remoteHost\c$
+function mountShare($Global:REMOTE_HOST) {
+    net use * \\$Global:REMOTE_HOST\c$ /user:$Global:SERVICE_ID $Global:PASSWORD
+    Invoke-Item \\$Global:REMOTE_HOST\c$
 }
 
-function getMailFile($remoteHost) {
+function getMailFile($Global:REMOTE_HOST) {
     $user = isUserSpecified
 
     $Global:COMMAND_SPECIFIED = $true
     $mailfile = "$user.nsf"
     $mailfileDestination = "C:\Users\$env:USERNAME\Downloads\$mailfile"
-    $mailfileSource = "\\" + "$remoteHost\d$\Lotus\Domino\data\mail\$mailfile"
+    $mailfileSource = "\\" + "$Global:REMOTE_HOST\d$\Lotus\Domino\data\mail\$mailfile"
     
     Write-Host "[*] Downloading mailfile to $mailfileDestination. Please wait, it will be opened automatically..."
     Copy-Item $mailfileSource -Destination $mailfileDestination -Force -Recurse
@@ -296,116 +311,116 @@ function getMailFile($remoteHost) {
     Invoke-Item $mailfileDestination
 }
 
-function getDrivers($remoteHost) {
+function getDrivers($Global:REMOTE_HOST) {
     $Global:COMMAND_SPECIFIED = $true
-    driverquery /s $remoteHost /u $Global:SERVICE_ID /p $Global:PASSWORD
+    driverquery /s $Global:REMOTE_HOST /u $Global:SERVICE_ID /p $Global:PASSWORD
 }
 
-function queryRegKey($remoteHost, $key) {
+function queryRegKey($Global:REMOTE_HOST, $key) {
     $command = 'regquery'
-    executeRemoteCommand $remoteHost $command $key
+    executeRemoteCommand $Global:REMOTE_HOST $command $key
 }
 
-function enumerateSystem($remoteHost) {
+function enumerateSystem($Global:REMOTE_HOST) {
     if ($arp) {
-        getARPTable $remoteHost
+        getARPTable $Global:REMOTE_HOST
     }
     if ($ipcfg) {
-        getIPConfig $remoteHost
+        getIPConfig $Global:REMOTE_HOST
     }
     if ($route) {
-        getRoutingTable $remoteHost
+        getRoutingTable $Global:REMOTE_HOST
     }
     if ($conns) {
-        getConnections $remoteHost
+        getConnections $Global:REMOTE_HOST
     }
     if ($procs) {
-        getProcessList $remoteHost
+        getProcessList $Global:REMOTE_HOST
     }
     if ($dnscache) {
-        getDNSCache $remoteHost
+        getDNSCache $Global:REMOTE_HOST
     }
     if ($mft) {
-        getMFT $remoteHost
+        getMFT $Global:REMOTE_HOST
     }
     if ($users) {
-        getUsers $remoteHost
+        getUsers $Global:REMOTE_HOST
     }
     if ($usbenum) {
-        getUSBEnum $remoteHost
+        getUSBEnum $Global:REMOTE_HOST
     }
     if ($regquery) {
-        queryRegKey $remoteHost $key
+        queryRegKey $Global:REMOTE_HOST $key
     }
     if ($typedurl) {
-        getTypedURLs $remoteHost
+        getTypedURLs $Global:REMOTE_HOST
     }
     if ($autoruns) {
-        getAutoruns $remoteHost
+        getAutoruns $Global:REMOTE_HOST
     }
     if ($prefetch) {
-        getPrefetches $remoteHost
+        getPrefetches $Global:REMOTE_HOST
     }
     if ($recent) {
-        getRecentItems $remoteHost
+        getRecentItems $Global:REMOTE_HOST
     }
     if ($sniffer) {
-        sniffTraffic $remoteHost
+        sniffTraffic $Global:REMOTE_HOST
     }
     if ($nbtcache) {
-        getNetbiosCache $remoteHost
+        getNetbiosCache $Global:REMOTE_HOST
     }
     if ($downloads) {
-        getDownloads $remoteHost
+        getDownloads $Global:REMOTE_HOST
     }
     if ($desktop) {
-        getDesktop $remoteHost
+        getDesktop $Global:REMOTE_HOST
     }
     if ($netstats) {
-        getNetstats $remoteHost
+        getNetstats $Global:REMOTE_HOST
     }
     if ($mount) {
-        mountShare $remoteHost
+        mountShare $Global:REMOTE_HOST
     }
     if ($mountedd) {
-        getMountedDevices $remoteHost
+        getMountedDevices $Global:REMOTE_HOST
     }
     if ($mounteds) {
-        getMountedShares $remoteHost
+        getMountedShares $Global:REMOTE_HOST
     }
     if ($artefacts) {
-        collectArtefacts $remoteHost
+        collectArtefacts $Global:REMOTE_HOST
     }
     if ($drivers) {
-        getDrivers $remoteHost
+        getDrivers $Global:REMOTE_HOST
     }
     if ($programs) {
-        getInstalledPrograms $remoteHost
+        getInstalledPrograms $Global:REMOTE_HOST
     }
     if ($typedurls) {
-        getTypedURLs $remoteHost
+        getTypedURLs $Global:REMOTE_HOST
     }
     if ($mailfile) {
-        getMailFile $remoteHost
+        getMailFile $Global:REMOTE_HOST
     }
     if ($module) {
-        executeExternalModule $remoteHost $module $modargs
+        executeExternalModule $Global:REMOTE_HOST $module $modargs
     }
     if (!$Global:COMMAND_SPECIFIED) {
-        Write-Host "[i] Command not specified, opening share \\$remoteHost\C$"
-        Invoke-Item \\$remoteHost\c$
+        Write-Host "[i] Command not specified, opening share \\$Global:REMOTE_HOST\C$"
+        Invoke-Item \\$Global:REMOTE_HOST\c$
     }
 }
 
-function executeExternalModule($remoteHost, $module, $modargs) {
-    executeRemoteCommand $remoteHost $module $modargs $true
+function executeExternalModule($Global:REMOTE_HOST, $module, $modargs) {
+    executeRemoteCommand $Global:REMOTE_HOST $module $modargs $true
 }
 
 function changeWorkingDirectory() {
     Set-Location $MyInvocation.PSScriptRoot
 }
 
-function executeRemoteCommand($remoteHost, $module, $arguments=$null, $isExternalModule=$false) {
+function executeRemoteCommand($Global:REMOTE_HOST, $module, $arguments=$null, $isExternalModule=$false) {
     $Global:COMMAND_SPECIFIED = $true
     if (!$isExternalModule) {
         $module = "mods\$command.ps1"
@@ -413,25 +428,34 @@ function executeRemoteCommand($remoteHost, $module, $arguments=$null, $isExterna
     Invoke-Command -Session $Global:SESSION -FilePath $module -ArgumentList $arguments
 }
 
-function downloadArtefact($remoteHost, $artefactName, $isLocked=$false) {
+function downloadArtefact($Global:REMOTE_HOST, $artefactName, $isLocked=$false) {
     $artefactsSaveLocation = "C:\artefacts\" + $artefactName
-    $artefactSourceLocation = "\\" + $remoteHost + "\c$\temp\$artefactName"
+    $artefactSourceLocation = "\\" + $Global:REMOTE_HOST + "\c$\temp\$artefactName"
     Write-Host "[*] Downloading $artefactName to $artefactsSaveLocation"
     Copy-Item $artefactSourceLocation -Destination $artefactsSaveLocation -Force -Recurse
 }
 
-function copyUtilsToRemoteHost($remoteHost) {
-    Copy-Item .\utils\copy.exe -Destination \\$remoteHost\c$\TEMP\copy.exe -Recurse -Force
+function copyUtilsToRemoteHost($Global:REMOTE_HOST) {
+    Copy-Item .\utils\copy.exe -Destination \\$Global:REMOTE_HOST\c$\TEMP\copy.exe -Recurse -Force
 }
 
-function establishRemoteSession($remoteHost) {
-    Write-Host "[*] Connecting to" $remoteHost
-    cmdkey.exe /add:$remoteHost /user:$Global:SERVICE_ID /pass:$Global:PASSWORD | Out-Null
+function notifyConnectionError() {
+    Write-Host "[*] Not connected. Machine offline or misspelled..."
+    break
+}
+
+function establishRemoteSession($Global:REMOTE_HOST) {
+    Write-Host "[*] Connecting to" $Global:REMOTE_HOST
+    cmdkey.exe /add:$Global:REMOTE_HOST /user:$Global:SERVICE_ID /pass:$Global:PASSWORD | Out-Null
 
     if (!$mailfile) {
-        $Global:SESSION = New-PSSession -ComputerName $remoteHost -Credential $Global:CREDENTIALS
+        $Global:SESSION = New-PSSession -ComputerName $Global:REMOTE_HOST -Credential $Global:CREDENTIALS
+        if ($Global:SESSION) {
+            Write-Host "[*] Connected!"
+        } else {
+            notifyConnectionError
+        }
     }
-    Write-Host "[*] Connected!"
 }
 
 main
