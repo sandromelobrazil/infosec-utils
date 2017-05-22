@@ -19,6 +19,9 @@ foreach ($path in $PATHS) {
     Write-Host
 }
 
+schtasks.exe
+# todo filter our known scheduled tasks / autoruns to show the unusual ones.
+
 # HKLM\System\CurrentControlSet\Services
 # HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce
 # HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce
