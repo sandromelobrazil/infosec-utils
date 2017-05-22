@@ -128,11 +128,18 @@ function getPersonalNotesFromKnownDeviceEntry($knownDevice) {
 
 function findSimilarDevices($filteredDevice, $knownDevicesFile) {
     [int] $attempt = 0
+    [int] $iteration = 0
+    [int] $percentComplete = 0
     $isSimilarDeviceFound = $false
     $filteredDeviceName = $filteredDevice.infoblox_MachineName
+    $knownDevicesFileContent =  Get-Content $knownDevicesFile
+    $knownDevicesCount = $knownDevicesFileContent.Length
+    $activity = "Finding similar devices, please wait..."
+    $progress = "Devices processed:"
 
-    Get-Content $knownDevicesFile | ForEach-Object {
+    $knownDevicesFileContent | ForEach-Object {
         $knownDevice = $_
+        $percentComplete = $iteration / $knownDevicesCount * 100
 
         # $filteredDeviceName.Length -gt $attempt + 4 <- this is so that similarly named device contains at least 4 similar characters, otherwise it's considered that no similar device is found.
         while ($attempt -lt $Global:MAX_ATTEMPTS -and $filteredDeviceName.Length -gt $attempt + 4) {
@@ -144,14 +151,21 @@ function findSimilarDevices($filteredDevice, $knownDevicesFile) {
                 Write-Host "[*] Similar because of:" $attemptName`n[*] Found in: (Split-Path -Leaf $knownDevicesFile)`n
                 constructWhitelistBlacklistPayload $filteredDevice $knownDevicesFile $knownDevice
                 $isSimilarDeviceFound = $true
+                updateProgress $activity $progress $percentComplete
                 break    
             }
             $attempt++
         }
+        $iteration++
         $attempt = 0
     }
-    
+    updateProgress $activity $progress $percentComplete    
+
     return $isSimilarDeviceFound
+}
+
+function updateProgress($activity, $progress, $percentComplete) {
+    Write-Progress -Activity $activity -Status $progress -PercentComplete $percentComplete 
 }
 
 main
