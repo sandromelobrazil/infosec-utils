@@ -51,7 +51,6 @@ def getIPFromDNSRecord(dnsRecords, record):
             DOMAIN_IP = dnsRecords[0]["value"]
     except:
         print("Domain you entered could not be resolved, check spelling.")
-        exit(1)
 
 
 def getDomainsByIP(ip):
@@ -125,11 +124,15 @@ def replaceEmptyItemsWithPlaceholders(registrantInfoValues):
 
 
 def getThreatReportsByIP(ip):
-    url = BASE_CYMON_URL + ip + "/events"
-    request = buildHTTPRequest(url)
-    response = sendHTTPRequest(request)
-    threatsReports = convertStringToJSON(response)
-    return threatsReports
+    if ip != None:
+        url = BASE_CYMON_URL + ip + "/events"
+        request = buildHTTPRequest(url)
+        response = sendHTTPRequest(request)
+        threatsReports = convertStringToJSON(response)
+        return threatsReports
+    else:
+        print("[!] Cannot retrieve threat reports as IP is not specified...")
+        exit(1)
 
 
 def printThreatReports(threatReports):
