@@ -203,6 +203,14 @@ def getTalosIntelligenceReport(IP):
     talosDetails = getTalosDetails(IP)
     report = "[*] Web score: " + talosDetails["web_score_name"] + "\n" + "[*] Email score: " + talosDetails["email_score_name"] + "\n"
     report += "[*] WBRS: " + getWBRS(IP)
+    blacklists = talosDetails["blacklists"]
+    blacklistReport = ""
+
+    for index, service in blacklists.items():
+        if service["rules"]:
+            blacklistReport += index + " "
+    report += "\n[*] Blacklisted on: " + blacklistReport
+
     print(report)
 
 
