@@ -29,10 +29,17 @@ function processCommandLineParams($url) {
             $Global:shouldFetchIrontPortEventsCount = $true
             getEventsCountInIronPort $url
         } else {
-            Write-Host $url being analysed...
-            getAllReportsForURL $url
+            Write-Host (sanitiseURL $url) being analysed...`n
+            $report = getAllReportsForURL $url
+            printReport $report
         }
     }
+}
+
+function printReport($report) {
+    Write-Host [*] $report.virusTotal
+    Write-Host [*] $report.urlVoid
+    Write-Host [*] $report.ironPort
 }
 
 function getAllReportsForURL($targetURL, $userName) {
