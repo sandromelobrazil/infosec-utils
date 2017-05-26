@@ -8,7 +8,6 @@ param( [string] $ignoreIP, [String]$LocalIP = "NotSpecified", [String]$ScanIP="a
 $LocalIP = (Test-Connection -ComputerName (hostname) -Count 1  | Select IPV4Address).IPV4Address.IPAddressToString
 Write-Host "[*] Will be sniffing remote machine": $LocalIP
 Write-Host "[i] Ignoring traffic to or from your machine": $ignoreIP
-Start-Sleep 5
 
 # Help / display usage
 if( $Help )
@@ -123,13 +122,6 @@ Function getService( $port )
 # Get local IP-Address
 if( $LocalIP -eq "NotSpecified" )
 {
-	# route print 0* |
-	# %{ 
-	# 	if( $_ -match "\s{2,}0\.0\.0\.0" )
-	# 	{ 
-	# 		$null,$null,$null,$LocalIP,$null = [regex]::replace($_.trimstart(" "),"\s{2,}",",").split(",")
-	# 	}
-	# }
 	Test-Connection -ComputerName (hostname) -Count 1  | Select IPV4Address
 	Write-Host "Local IP: $LocalIP"
 }
@@ -147,14 +139,22 @@ $Socket.Bind( $Endpoint )
 # Enable promiscuous mode
 [void]$Socket.IOControl( [Net.Sockets.IOControlCode]::ReceiveAll, $byteIn, $byteOut )
 
-Write-Host "Press CTRL+C and hold it for a while to stop the packet sniffer ..." -fore yellow
-Write-Host ""
+# Write-Host "Press CTRL+C and hold it for a while to stop the packet sniffer ..." -fore yellow
+# Write-Host ""
 $escKey = 27
 $running = $true
 
 
 # Start sniffing
+$sniffFileName = [string] (hostname) + "-sniff.csv"
+$sniffDumpPath = "C:\temp\$sniffFileName"
+# Remove-Item $sniffDumpPath
+
 $packets = @()							# array for packets
+$snifferOutput = "" # this will contain the ASCII that we will dump to a text file at some point so the client who requested to sniff the remote machine could download that file to a local machine as it's easier to read the file that way that in the console view.
+$snifferOutput = "time, ipv, protNum, protDesc, destIP, srcIP, dstHost, srcHst, dstPort, srcPort, imcpType, icmpTypeDesc, icmpCode, icmpCodeDesc, igmpType, igmMaxRespTime, seqN, ackN, window, flags, tcpServiceDesc, udpServiceDesc, data"
+$snifferOutput | Out-File $sniffDumpPath
+
 while( $running )
 {
 	# when a key was pressed...
@@ -377,33 +377,44 @@ while( $running )
 			if( ($ScanIP -eq "all") -or ($ScanIP -eq $SourceIp) -or ($ScanIP -eq $DestinationIP) -and -not ($DestinationIP -eq $ignoreIP -or $SourceIP -eq $ignoreIP) )
 			#if( $ScanIP -eq $SourceIp -and $ScanIP -eq $DestinationIP )
 			{
-				Write-Host "Time:`t`t$(get-date)"
+				$date = $(get-date)
+				Write-Host "Time:`t`t$date"
 				Write-Host "Version:`t$ipVersion`t`t`tProtocol:`t$ProtocolNumber = $ProtocolDesc"
 				Write-Host "Destination:`t$DestinationIP`t`tSource:`t`t$SourceIP"
+
+				$snifferOutput = "$date, $ipVersion, $ProtocolNumber, $ProtocolDesc, $DestinationIP, $SourceIP"
+
 				if( $ResolveHosts )
 				{
 					Write-Host "DestinationHostName`t$DestinationHostName`tSourceHostName`t$SourceHostName"
 				}
+				
 				Write-Host "DestPort:`t$destPort`t`t`tSourcePort:`t$sourcePort"
+
+				$snifferOutput += ",$DestinationHostName, $SourceHostName, $destPort, $sourcePort"
 				switch( $ProtocolDesc )
 				{
 					"ICMP"	{
 							Write-Host "Type:`t`t$ICMPType`t`t`tDescription:`t$ICMPTypeDesc"
 							Write-Host "Code:`t`t$ICMPCode`t`t`tDescription:`t$ICMPCodeDesc"
+							$snifferOutput += ",$ICMPType, $ICMPTypeDesc, $ICMPCode, $ICMPCodeDesc, , , , , , , ,"
 							break
 						}
 					"IGMP"	{
 							Write-Host "Type:`t`t$IGMPType`t`t`tMaxRespTime:`t$($IGMPMaxRespTime*100)ms"
+							$snifferOutput += ", , , , $IGMPType, $($IGMPMaxRespTime*100)ms, , , , , , ,"
 							break
 						}
 					"TCP"	{
 							Write-Host "Sequence:`t$SequenceNumber`t`tAckNumber:`t$AckNumber"
 							Write-Host "Window:`t`t$TCPWindow`t`t`tFlags:`t`t$TCPFlagsString"
 							Write-Host "Service:`t$serviceDesc"
+							$snifferOutput += ", , , , , , , $SequenceNumber, $AckNumber, $TCPWindow, $TCPFlagsString, $serviceDesc, "
 							break
 						}
 					"UDP"	{
 							Write-Host "Service:`t$serviceDesc"
+							$snifferOutput += ", , , , , , , , , , , , $serviceDesc"
 							break
 						}
 				}
@@ -418,7 +429,9 @@ while( $running )
 				$OFS=""	# eliminate spaces from output of char array
 				Write-Host "Data: $Data"
 				Write-Host "----------------------------------------------------------------------"
-				# $Data | Out-File C:\pienas.txt -Append
+				
+				$snifferOutput += ",$Data"
+				$snifferOutput | Out-File $sniffDumpPath -Append
 			}
 		}
 	}
