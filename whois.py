@@ -204,8 +204,7 @@ def getTalosDetails(host):
 
 
 def getTalosIntelligenceReport(IP):
-    report = ""
-    printSection("Talos Intelligence + AbuseIPDB (based on IP)")
+    printSection("Talos Intelligence + AbuseIPDB")
     talosDetails = getTalosDetails(IP)
     report = "[*] Web score: " + talosDetails["web_score_name"] + "\n"
     report += "[*] WBRS: " + getWBRS(IP)
