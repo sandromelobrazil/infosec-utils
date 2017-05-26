@@ -4,7 +4,7 @@ param (
 
 function processArguments() {
     if ($ip -eq "") {
-        Write-Host "[i] iptod (IP to Domain) usage: iptod.ps1 <IP>. Example: iptod.ps1 127.0.0.1"
+        Write-Host "[i] itod (IP to Domain) usage: itod.ps1 <IP>. Example: itod.ps1 127.0.0.1"
         break
     }
 }
