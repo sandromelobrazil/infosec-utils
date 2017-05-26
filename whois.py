@@ -183,33 +183,40 @@ def printHostName(hostname):
         print("\n[*] Could not resolve IP to hostname...")
 
 
-def getWBRS(IP):
-    url = BASE_TALOS_URL + "remote_lookup?hostname=SDS&query_string=%2Fscore%2Fwbrs%2Fjson%3Furl=" + IP
+def getWBRS(host):
+    url = BASE_TALOS_URL + "remote_lookup?hostname=SDS&query_string=%2Fscore%2Fwbrs%2Fjson%3Furl=" + host
     request = buildHTTPRequest(url)
     response = convertStringToJSON(sendHTTPRequest(request))
     wbrs = str(response[0]["response"]["wbrs"]["score"])
     return wbrs
 
 
-def getTalosDetails(IP):
-    url = BASE_TALOS_URL + "query_lookup?query=%2Fapi%2Fv2%2Fdetails%2Fip%2F&query_entry=" + IP
+def getTalosDetails(host):
+    if isValidIPAddress(host):
+        queryType = "ip"
+    else:
+        queryType = "domain"
+
+    url = BASE_TALOS_URL + "query_lookup?query=%2Fapi%2Fv2%2Fdetails%2F" + queryType + "%2F&query_entry=" + host
     request = buildHTTPRequest(url)
     response = convertStringToJSON(sendHTTPRequest(request))
     return response
 
 
 def getTalosIntelligenceReport(IP):
-    printSection("Talos Intelligence + AbuseIPDB")
+    report = ""
+    printSection("Talos Intelligence + AbuseIPDB (based on IP)")
     talosDetails = getTalosDetails(IP)
-    report = "[*] Web score: " + talosDetails["web_score_name"] + "\n" + "[*] Email score: " + talosDetails["email_score_name"] + "\n"
+    report = "[*] Web score: " + talosDetails["web_score_name"] + "\n"
     report += "[*] WBRS: " + getWBRS(IP)
-    blacklists = talosDetails["blacklists"]
-    blacklistReport = ""
-
-    for index, service in blacklists.items():
-        if service["rules"]:
-            blacklistReport += index + " "
-    report += "\n[*] Blacklisted on: " + blacklistReport
+    
+    if "blacklists" in talosDetails:
+        blacklists = talosDetails["blacklists"]
+        blacklistReport = "None"
+        for index, service in blacklists.items():
+            if service["rules"]:
+                blacklistReport += index + " "
+        report += "\n[*] Blacklists: " + blacklistReport
 
     print(report)
 
@@ -242,7 +249,7 @@ def main():
         printDoimainWhois(whoisDomainRaw, host)
         threatReports = getThreatReportsByIP(DOMAIN_IP)
         printThreatReports(threatReports)
-        getTalosIntelligenceReport(DOMAIN_IP)
+        getTalosIntelligenceReport(host)
         getAbuseIpReport(DOMAIN_IP)
     else:
         print("Supply a domain or IPv4 like so: whois.py [domain | IP]")
