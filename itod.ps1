@@ -22,7 +22,7 @@ function getDomainByIp($ip, $dnsRecords) {
 
     foreach ($record in $dnsRecords) {
         if ($record.ip -eq $ip) {
-            Write-Host $record.domain
+            Write-Host [>] $record.domain
             $isResolved = $true
         }
     }
