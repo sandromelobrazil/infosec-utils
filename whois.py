@@ -184,6 +184,7 @@ def printHostName(hostname):
 
 
 def getWBRS(host):
+    wbrs = "N / A"
     url = BASE_TALOS_URL + "remote_lookup?hostname=SDS&query_string=%2Fscore%2Fwbrs%2Fjson%3Furl=" + host
     request = buildHTTPRequest(url)
     response = convertStringToJSON(sendHTTPRequest(request))
@@ -204,9 +205,12 @@ def getTalosDetails(host):
 
 
 def getTalosIntelligenceReport(IP):
+    report = ""
     printSection("Talos Intelligence + AbuseIPDB")
     talosDetails = getTalosDetails(IP)
-    report = "[*] Web score: " + talosDetails["web_score_name"] + "\n"
+    
+    if "web_score_name" in talosDetails:
+        report = "[*] Web score: " + talosDetails["web_score_name"] + "\n"
     report += "[*] WBRS: " + getWBRS(IP)
     
     if "blacklists" in talosDetails:
