@@ -9,4 +9,3 @@ if ($servicePack -eq "") {
 $osVersion = "`n$osv1 ($version). $servicePack"
 
 Write-Host $osVersion
-[environment]::OSVersion.Version
