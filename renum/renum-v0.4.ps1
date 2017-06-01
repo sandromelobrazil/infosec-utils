@@ -177,21 +177,30 @@ function sniffTraffic() {
 }
 
 function waitForEscapeKey() {
-    Write-Host "[*] Sniffing... Press ESC or Ctrl+C to stop sniffing and download the results..." -ForegroundColor Green -BackgroundColor DarkCyan
-    
+    [int] $percent = 0
+    [date] $sniffingStartTime = (Get-Date)
+
     while ($true) {
+        Write-Progress -Activity "Sniffing $Global:REMOTE_HOST... Press ESC or Ctrl+C to stop sniffing and download the results..." -Status ((Get-Date) - $sniffingStartTime) -PercentComplete $percent
+
         if ($host.ui.RawUi.KeyAvailable) {
             $pressedKey = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
             
             if ($pressedKey.VirtualKeyCode -eq 27 -or (3 -eq [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
+                Get-Job | Stop-Job 
+                Get-Job | Remove-Job
                 $artefact = downloadArtefact "$Global:REMOTE_HOST-sniff.csv"
                 Write-Host "[*] Download complete."
                 Remove-Item $artefact
-                Get-Job | Stop-Job 
-                Get-Job | Remove-Job
                 break
             }
         } 
+
+        if ($percent -eq 100) {
+            $percent = 0
+        } else {
+            $percent++
+        }
         Start-Sleep 0.1
     }
 }
