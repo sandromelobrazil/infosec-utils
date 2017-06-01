@@ -169,12 +169,6 @@ function isUserSpecified() {
     }
 }
 
-function getRecentItems() {
-    $user = isUserSpecified
-    $command = "recent"
-    executeRemoteCommand $command $user
-}
-
 function sniffTraffic() {
     $command = "sniffer"
     $ignoreIP = (Test-Connection -ComputerName (hostname) -Count 1 | Select IPV4Address).IPV4Address.IPAddressToString
