@@ -256,6 +256,7 @@ function enumerateSystem() {
                 "mft" { getMFT }
                 "drivers" { getDrivers }
                 "mailfile" { getMailFile }
+                "sniffer" { sniffTraffic }
                 "module" { executeExternalModule $module $modargs }
                 Default { executeRemoteCommand $module.name $module.arguments }
             }
