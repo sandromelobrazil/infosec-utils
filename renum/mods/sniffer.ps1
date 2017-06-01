@@ -152,7 +152,7 @@ $sniffDumpPath = "C:\temp\$sniffFileName"
 
 $packets = @()							# array for packets
 $snifferOutput = "" # this will contain the ASCII that we will dump to a text file at some point so the client who requested to sniff the remote machine could download that file to a local machine as it's easier to read the file that way that in the console view.
-$snifferOutput = "time, ipv, protNum, protDesc, destIP, srcIP, dstHost, srcHst, dstPort, srcPort, imcpType, icmpTypeDesc, icmpCode, icmpCodeDesc, igmpType, igmMaxRespTime, seqN, ackN, window, flags, tcpServiceDesc, udpServiceDesc, data"
+$snifferOutput = "time, ipv, protNum, protDesc, dstIP, srcIP, dstHost, srcHst, dstPort, srcPort, imcpType, icmpTypeDesc, icmpCode, icmpCodeDesc, igmpType, igmMaxRespTime, seqN, ackN, window, flags, tcpServiceDesc, udpServiceDesc, data"
 $snifferOutput | Out-File $sniffDumpPath
 
 while( $running )
