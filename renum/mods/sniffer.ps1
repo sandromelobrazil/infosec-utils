@@ -1,6 +1,7 @@
 # A .Net based PowerShell packet sniffer ("promiscuous mode" must be supported by hardware/driver)
 # param "-help" to print usage
-# Mantvydas: I'm not an author of this module. It's written by Sven Sperner, downloaded from: https://github.com/sperner/PowerShell/blob/master/Sniffer.ps1
+# Mantvydas: I'm not an author of this module. It's written by Sven Sperner originally. Downloaded from: https://github.com/sperner/PowerShell/blob/master/Sniffer.ps1
+# I have adapted it for REnum.
 
 param( [string] $ignoreIP, [String]$LocalIP = "NotSpecified", [String]$ScanIP="all", [String]$Protocol = "all", `
 		[String]$Port="all", [Int]$Seconds = 0, [switch]$ResolveHosts, [switch]$Help )
