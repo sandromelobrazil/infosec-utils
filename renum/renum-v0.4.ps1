@@ -214,9 +214,9 @@ function waitForEscapeKey() {
     }
 }
 
-function getMFT() {
+function getMFT($module) {
     copyUtilsToRemoteHost
-    executeRemoteCommand "mft"  
+    executeRemoteCommand $module
     $remoteMFTpath = downloadArtefact "$Global:REMOTE_HOST.mft"
     Remove-Item $remoteMFTpath   
     parseMFT
@@ -278,7 +278,7 @@ function enumerateSystem() {
         if ($module.shouldExecute) {
             switch ($module.name) {
                 "shell" { getShell }
-                "mft" { getMFT }
+                "mft" { getMFT $module }
                 "drivers" { getDrivers }
                 "mailfile" { getMailFile }
                 "mailfileo" { getOutlookMailFile }
