@@ -66,7 +66,7 @@ $Global:MODULES = [array] (
     (ConstructModuleObject "tasklist" "-procs`t`t Get running processes" $procs),
     (ConstructModuleObject "connections" "-conns`t`t Get established connections & ports listening" $conns),
     (ConstructModuleObject "users" "-users`t`t Get users who have used the machine" $users),
-    (ConstructModuleObject "loggedon" "-loggedon,`t Get currently logged on users" $loggedon),
+    (ConstructModuleObject "loggedon" "-loggedon`t Get currently logged on users" $loggedon),
     (ConstructModuleObject "regquery" "-regquery`t Get registry key info. Use -key to specify the 'key'. Mind the quotes." $regquery $key),
     (ConstructModuleObject "autoruns" "-autoruns`t Get autoruns from popular persistence locations. Requires -user <username>" $autoruns $user $true),
     (ConstructModuleObject "mounteddevices" "-mountedd`t Get currently mounted physical device letters" $mountedd),
@@ -101,8 +101,14 @@ function main() {
     } 
     
     establishRemoteSession
+    setupEnvironment
     enumerateSystem
     closeRemoteSession
+}
+
+function setupEnvironment() {
+    if (!(Test-Path -Path $Global:ARTEFACTS_PATH)) { New-Item -ItemType Directory -Path $Global:ARTEFACTS_PATH -Force | Out-Null }
+    # if (!(Test-Path -Path $Global:ARTEFACTS_PATH)) { New-Item -ItemType File -Path $artefactsSaveLocation -Force }
 }
 
 function closeRemoteSession() {
@@ -175,19 +181,27 @@ function isUserSpecified() {
 }
 
 function sniffTraffic($module) {
+    $packetCaptureFilename = "$Global:REMOTE_HOST-sniff.csv"
     $ignoreIP = (Test-Connection -ComputerName (hostname) -Count 1 | Select IPV4Address).IPV4Address.IPAddressToString
+
     executeRemoteCommand $module $ignoreIP
-    $packetCaptureFileLocation = waitForEscapeKey
-    identifySuspiciousTraffic $packetCaptureFileLocation
+    waitForEscapeKey
+    $artefact = downloadArtefact $packetCaptureFilename
+    Write-Host "[*] Download complete."
+
+    identifySuspiciousTraffic $packetCaptureFilename
+    Remove-Item $artefact
 }
 
-function identifySuspiciousTraffic($packetCaptureFileLocation) {
-    powershell $Global:UTILS_PATH\find-suspicious-traffic.ps1 $Global:ARTEFACTS_PATH\$packetCaptureFileLocation
+function identifySuspiciousTraffic($packetCaptureFilename) {
+    $location = $Global:ARTEFACTS_PATH + $packetCaptureFilename
+    powershell $Global:UTILS_PATH\find-suspicious-traffic.ps1 $location
 }
 
 function waitForEscapeKey() {
     [int] $percent = 0
     [date] $sniffingStartTime = (Get-Date)
+    $artefact = $null
 
     while ($true) {
         Write-Progress -Activity "Sniffing traffic $Global:REMOTE_HOST... Press ESC or Ctrl+C to stop and download the results..." -Status ((Get-Date) - $sniffingStartTime) -PercentComplete $percent
@@ -198,12 +212,7 @@ function waitForEscapeKey() {
             if ($pressedKey.VirtualKeyCode -eq 27 -or (3 -eq [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
                 Get-Job | Stop-Job 
                 Get-Job | Remove-Job
-                $packetCaptureFilename = "$Global:REMOTE_HOST-sniff.csv"
-                $artefact = downloadArtefact $packetCaptureFilename
-                Write-Host "[*] Download complete."
-                Remove-Item $artefact
-                return $packetCaptureFilename
-                break
+                return 
             }
         } 
 
@@ -214,6 +223,8 @@ function waitForEscapeKey() {
         }
         Start-Sleep 0.1
     }
+
+    write-host $artefact
 }
 
 function getMFT($module) {
@@ -337,7 +348,8 @@ function downloadArtefact($artefactName, $isLocked=$false) {
     $artefactsSaveLocation = "$Global:ARTEFACTS_PATH$artefactName"
     $artefactSourceLocation = "\\" + $Global:REMOTE_HOST + "\c$\temp\$artefactName"
     Write-Host "[*] Downloading $artefactName to $artefactsSaveLocation"
-    Copy-Item $artefactSourceLocation -Destination $artefactsSaveLocation -Force -Recurse
+    
+    Copy-Item $artefactSourceLocation -Destination $Global:ARTEFACTS_PATH -Force -Recurse   
     return $artefactSourceLocation
 }
 
