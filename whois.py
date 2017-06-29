@@ -1,19 +1,29 @@
 #!/bin/python3.5
 import urllib.request
+import requests
 import json
 import sys
 import socket
+import os
+import re
 from urllib.error import URLError
 from urllib.error import HTTPError
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 BASE_WHOIS_URL = "https://www.whois.com/whois/"
 BASE_CYMON_URL = "https://cymon.io/api/nexus/v1/ip/"
 BASE_TALOS_URL = "https://talosintelligence.com/sb_api/"
 BASE_ABUSEIP_URL = "https://www.abuseipdb.com/check/"
+PROXY_HOST = ""
+PROXY_HOST_STRING = os.environ["username"] + "@" + PROXY_HOST
+PROXIES = {
+    "http": PROXY_HOST_STRING,
+    "https": PROXY_HOST_STRING}
 
 def sendHTTPRequest(request):
     try:
-        response = urllib.request.urlopen(request).read().decode("utf-8")
+        response = requests.get(request.full_url, headers=request.headers, proxies=PROXIES, verify=False).content.decode("utf-8")
     except HTTPError as httperror:
         return httperror
     except URLError as urlerror:
@@ -24,7 +34,13 @@ def sendHTTPRequest(request):
     return response
 
 
-def buildHTTPRequest(url, headers={"Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", "User-Agent": "Mantvydas' cmd-line Whois", "Accept": "application/json", "Content-Type": "text/html; charset=utf-8"}, data=None):
+def buildHTTPRequest(url, headers=None, data=None):
+    if headers == None:
+        headers = {
+            "Authorization": "Token 9dd9bc3276b0c35f5d64624bb7901f296b0ff37a", 
+            "User-Agent": "Mantvydas' cmd-line Whois", 
+            "Accept": "application/json", 
+            "Content-Type": "text/html; charset=utf-8"}    
     httpRequest = urllib.request.Request(url, data=data, headers=headers)
     return httpRequest
 
@@ -34,8 +50,8 @@ def fetchAllDNSRecordsByDomain(domain):
         "A",
         "MX",
         "NS",
-        "TXT",
-        "SOA"
+        # "TXT",
+        # "SOA"
     ]
     printSection("DNS Lookup")
 
@@ -256,6 +272,7 @@ def main():
         getAbuseIpReport(DOMAIN_IP)
     else:
         print("Supply a domain or IPv4 like so: whois.py [domain | IP]")
+
 
 
 main()
