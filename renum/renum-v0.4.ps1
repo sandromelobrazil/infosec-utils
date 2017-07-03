@@ -334,21 +334,17 @@ function changeWorkingDirectory() {
 
 function executeRemoteCommand($module, $arguments=$null, $isExternalModule=$false) {
     $Global:COMMAND_SPECIFIED = $true
-    $command = $module.name
 
     if ($module.isUserIDRequired -and $user -eq "") {
         $module.arguments = isUserSpecified
     }
-    $arguments = $module.arguments
-
     if (!$isExternalModule) {
-        $module = "$Global:MODS_PATH\$command.ps1"
+        $modulePath = "$Global:MODS_PATH\" + $module.name + ".ps1"
     } 
-    
-    if ($command -eq "sniffer") {
-        Invoke-Command -Session $Global:SESSION -FilePath $module -ArgumentList $arguments -AsJob | Out-Null
+    if ($module.name -eq "sniffer") {
+        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments.arguments -AsJob | Out-Null
     } else {
-        Invoke-Command -Session $Global:SESSION -FilePath $module -ArgumentList $arguments
+        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments.arguments
     }
 }
 
