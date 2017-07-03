@@ -92,7 +92,16 @@ $Global:MODULES = [array] (
     (ConstructModuleObject "recent" "-recent`t Get recently accessed documents. Requires -user <username>" $recent $user $true)
 )
 
+function debugSession() {
+    $Global:REMOTE_HOST = ""
+    $module =  ".\utils\find-suspicious-traffic.ps1"
+    $modargs = ""
+    $Global:COMMAND_SPECIFIED = $true
+    executeExternalModule $module $modargs
+}
+
 function main() {
+    # debugSession
     changeWorkingDirectory
     processArguments
         
@@ -108,7 +117,6 @@ function main() {
 
 function setupEnvironment() {
     if (!(Test-Path -Path $Global:ARTEFACTS_PATH)) { New-Item -ItemType Directory -Path $Global:ARTEFACTS_PATH -Force | Out-Null }
-    # if (!(Test-Path -Path $Global:ARTEFACTS_PATH)) { New-Item -ItemType File -Path $artefactsSaveLocation -Force }
 }
 
 function closeRemoteSession() {
@@ -158,7 +166,7 @@ function processHost() {
         if ([ipaddress] $Global:REMOTE_HOST) {
             $Global:REMOTE_HOST = [System.Net.Dns]::GetHostByAddress($Global:REMOTE_HOST).HostName
         }
-    } catch {}
+    } catch { }
 }
 
 function processCredentials() {
@@ -208,7 +216,6 @@ function waitForEscapeKey() {
 
         if ($host.ui.RawUi.KeyAvailable) {
             $pressedKey = $host.ui.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-            
             if ($pressedKey.VirtualKeyCode -eq 27 -or (3 -eq [int]$Host.UI.RawUI.ReadKey("AllowCtrlC,IncludeKeyUp,NoEcho").Character)) {
                 Get-Job | Stop-Job 
                 Get-Job | Remove-Job
@@ -221,6 +228,7 @@ function waitForEscapeKey() {
         } else {
             $percent++
         }
+
         Start-Sleep 0.1
     }
 
@@ -308,10 +316,10 @@ function enumerateSystem() {
 function isCommandNotSpecified() {
     if (!$Global:COMMAND_SPECIFIED) {
         if ($mount) {
-            Write-Host "[i] Mounting share \\$Global:REMOTE_HOST\C$"
+            Write-Host "[*] Mounting share \\$Global:REMOTE_HOST\C$"
             mountShare
         }
-        Write-Host "[i] Opening share \\$Global:REMOTE_HOST\C$"
+        Write-Host "[*] Opening share \\$Global:REMOTE_HOST\C$"
         Invoke-Item \\$Global:REMOTE_HOST\c$
     }
 }
@@ -335,7 +343,7 @@ function executeRemoteCommand($module, $arguments=$null, $isExternalModule=$fals
 
     if (!$isExternalModule) {
         $module = "$Global:MODS_PATH\$command.ps1"
-    }
+    } 
     
     if ($command -eq "sniffer") {
         Invoke-Command -Session $Global:SESSION -FilePath $module -ArgumentList $arguments -AsJob | Out-Null
