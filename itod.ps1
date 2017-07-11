@@ -21,8 +21,8 @@ function getDomainByIp($ip, $dnsRecords) {
     Write-Host "[*] Searching..."
 
     foreach ($record in $dnsRecords) {
-        if ($record.ip -eq $ip) {
-            Write-Host [>] $record.domain
+        if ($record.ip -like "*$ip*") {
+            Write-Host [>] $record.ip "`t" $record.domain
             $isResolved = $true
         }
     }
