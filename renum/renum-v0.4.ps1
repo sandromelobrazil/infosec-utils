@@ -39,7 +39,7 @@ param(
     [switch]$h
 )
 
-# If these not set, you will be prompted for your service id credentials. Setting these is not encouraged.
+# If these not set, you will be prompted for your elevated credentials. Hard-coding discouraged.
 $Global:SERVICE_ID = ""
 $Global:PASSWORD = ''
 $Global:SESSION = ""
@@ -47,6 +47,7 @@ $Global:COMMAND_SPECIFIED = $false
 $Global:MODS_PATH = ".\mods\"
 $Global:UTILS_PATH = ".\utils\"
 $Global:ARTEFACTS_PATH = "C:\artefacts\"
+$Global:CREDENTIALS = ""
 
 function ConstructModuleObject([string] $_name, [string] $_helpText, $_shouldExecute, [string] $_arguments = $false, [bool] $_userIDRequired = $false) {
     $moduleObject = @{
@@ -103,6 +104,7 @@ function debugSession() {
 function main() {
     # debugSession
     changeWorkingDirectory
+    processCredentials
     processArguments
         
     if ($h) {
@@ -147,8 +149,8 @@ function printHelp() {
         Write-Host "`n[i] Available commands:`n
         Tip:`t`t Omit the command to open C$ share without mounting it... or use -mount to do it"
         
-        foreach ($module in $Global:MODULES) {
-            Write-Host "`t" $module.helpText
+        foreach ($module_ in $Global:MODULES) {
+            Write-Host "`t" $module_.helpText
         }
         break
 }
@@ -158,7 +160,6 @@ function processArguments() {
         printHelp
     }
     processHost  
-    processCredentials
 }
 
 function processHost() {
@@ -171,11 +172,15 @@ function processHost() {
 
 function processCredentials() {
     if ($Global:PASSWORD -eq '' -or $Global:SERVICE_ID -eq '') {
-        $Global:CREDENTIALS = Get-Credential
+        $Global:CREDENTIALS = (Get-Credential).GetNetworkCredential()
+        $Global:SERVICE_ID = $Global:CREDENTIALS.UserName
+        $Global:PASSWORD = $Global:CREDENTIALS.Password
+        processCredentials
     } else {
         $Global:PASSWORD2 = ConvertTo-SecureString $Global:PASSWORD -AsPlainText -Force
         $Global:CREDENTIALS = New-Object System.Management.Automation.PSCredential($Global:SERVICE_ID, $Global:PASSWORD2)
     }
+    # return $Global:CREDENTIALS
 }
 
 function isUserSpecified() {
@@ -295,17 +300,17 @@ function getDrivers() {
 }
 
 function enumerateSystem() {
-    foreach ($module in $Global:MODULES) {
-        if ($module.shouldExecute) {
-            switch ($module.name) {
+    foreach ($module_ in $Global:MODULES) {
+        if ($module_.shouldExecute) {
+            switch ($module_.name) {
                 "shell" { getShell }
-                "mft" { getMFT $module }
+                "mft" { getMFT $module_ }
                 "drivers" { getDrivers }
                 "mailfile" { getMailFile }
                 "mailfileo" { getOutlookMailFile }
-                "sniffer" { sniffTraffic $module }
+                "sniffer" { sniffTraffic $module_ }
                 "module" { executeExternalModule $module $modargs }
-                Default { executeRemoteCommand $module $module }
+                Default { executeRemoteCommand $module_ }
             }            
         }
     }
@@ -324,8 +329,8 @@ function isCommandNotSpecified() {
     }
 }
 
-function executeExternalModule($module, $modargs) {
-    executeRemoteCommand $module $modargs $true
+function executeExternalModule($externalModulePath, $modargs) {
+    executeRemoteCommand $externalModulePath $modargs $true
 }
 
 function changeWorkingDirectory() {
@@ -335,16 +340,28 @@ function changeWorkingDirectory() {
 function executeRemoteCommand($module, $arguments=$null, $isExternalModule=$false) {
     $Global:COMMAND_SPECIFIED = $true
 
-    if ($module.isUserIDRequired -and $user -eq "") {
-        $module.arguments = isUserSpecified
-    }
-    if (!$isExternalModule) {
-        $modulePath = "$Global:MODS_PATH\" + $module.name + ".ps1"
+    if ($module.isUserIDRequired) {
+        if ($user -eq "") {
+            $user = isUserSpecified
+        } 
+        $arguments = $user
     } 
-    if ($module.name -eq "sniffer") {
-        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments.arguments -AsJob | Out-Null
+    
+    if ($module.arguments -ne "") {
+        $arguments = $module.arguments
+    }
+    
+    if ($isExternalModule) {
+        $modulePath = $module
+        $arguments = $modargs
     } else {
-        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments.arguments
+        $modulePath = "$Global:MODS_PATH\" + $module.name + ".ps1"
+    }
+
+    if ($module.name -eq "sniffer") {
+        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments -AsJob | Out-Null
+    } else {
+        Invoke-Command -Session $Global:SESSION -FilePath $modulePath -ArgumentList $arguments
     }
 }
 
